@@ -1,1565 +1,1304 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bug Hunter: Junior Dev Edition</title>
-    <!-- Retro Pixel & Monospace Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Press+Start+2P&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        :root {
-            --pixel-font: 'Press Start 2P', monospace;
-            --code-font: 'Fira Code', monospace;
-            --ui-font: 'Inter', sans-serif;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bug Hunter: Junior Dev Edition (v0.1)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --pixel-font: 'Press Start 2P', monospace;
+      --code-font: 'JetBrains Mono', monospace;
+      --bg-dark: #0d1117;
+      --panel-bg: #161b22;
+      --panel-border: #30363d;
+      --accent-green: #3fb950;
+      --accent-blue: #58a6ff;
+      --accent-amber: #d29922;
+      --accent-red: #f85149;
+      --accent-purple: #bc8cff;
+      --text-main: #e6edf3;
+      --text-muted: #8b949e;
+    }
 
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-        }
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
 
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #0d1117;
-            color: #e6edf3;
-            font-family: var(--ui-font);
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            flex-direction: column;
-        }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--code-font);
+      overflow: hidden;
+    }
 
-        .font-pixel {
-            font-family: var(--pixel-font);
-        }
+    #game-wrap {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #161d29 0%, #090c10 100%);
+    }
 
-        .font-code {
-            font-family: var(--code-font);
-        }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+    }
 
-        /* Crisp Pixel Art Rendering */
-        canvas {
-            image-rendering: -moz-crisp-edges;
-            image-rendering: -webkit-crisp-edges;
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
+    /* Retro Button Styling */
+    .retro-btn {
+      font-family: var(--pixel-font);
+      font-size: 11px;
+      line-height: 1.4;
+      color: #ffffff;
+      background: linear-gradient(180deg, #2ea043 0%, #238636 100%);
+      border: 3px solid #3fb950;
+      border-radius: 4px;
+      padding: 10px 14px;
+      box-shadow: 0 4px 0 #196127, 0 6px 12px rgba(0, 0, 0, 0.5);
+      transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.15s ease;
+      cursor: pointer;
+    }
 
-        /* Retro Button Styling */
-        .retro-btn {
-            font-family: var(--pixel-font);
-            background: linear-gradient(180deg, #2ea043 0%, #238636 100%);
-            border: 3px solid #3fb950;
-            box-shadow: 0 4px 0 #196127, 0 6px 12px rgba(0,0,0,0.5);
-            transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.15s ease;
-            cursor: pointer;
-        }
+    .retro-btn:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+      box-shadow: 0 5px 0 #196127, 0 8px 15px rgba(0, 0, 0, 0.6);
+    }
 
-        .retro-btn:hover {
-            filter: brightness(1.1);
-            transform: translateY(-1px);
-            box-shadow: 0 5px 0 #196127, 0 8px 15px rgba(0,0,0,0.6);
-        }
+    .retro-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #196127;
+    }
 
-        .retro-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 1px 0 #196127;
-        }
+    .retro-btn-blue {
+      background: linear-gradient(180deg, #1f6feb 0%, #1158c7 100%);
+      border-color: #58a6ff;
+      box-shadow: 0 4px 0 #0c3d8a, 0 6px 12px rgba(0, 0, 0, 0.5);
+    }
 
-        .retro-btn-blue {
-            background: linear-gradient(180deg, #1f6feb 0%, #1158c7 100%);
-            border-color: #58a6ff;
-            box-shadow: 0 4px 0 #0c3d8a, 0 6px 12px rgba(0,0,0,0.5);
-        }
-        .retro-btn-blue:active {
-            box-shadow: 0 1px 0 #0c3d8a;
-        }
+    .retro-btn-blue:hover {
+      box-shadow: 0 5px 0 #0c3d8a, 0 8px 15px rgba(0, 0, 0, 0.6);
+    }
 
-        /* Code Line Hover & Selection States */
-        .code-line {
-            transition: background-color 0.12s ease, transform 0.08s ease;
-            cursor: pointer;
-            border-left: 3px solid transparent;
-        }
+    .retro-btn-blue:active {
+      box-shadow: 0 1px 0 #0c3d8a;
+    }
 
-        .code-line:hover:not(.locked) {
-            background-color: rgba(88, 166, 255, 0.15);
-            border-left-color: #58a6ff;
-        }
+    .retro-btn-amber {
+      background: linear-gradient(180deg, #bb8009 0%, #9e6a03 100%);
+      border-color: #e3b341;
+      box-shadow: 0 4px 0 #634202, 0 6px 12px rgba(0, 0, 0, 0.5);
+    }
 
-        .code-line.correct-bug {
-            background-color: rgba(46, 160, 67, 0.28) !important;
-            border-left-color: #3fb950 !important;
-            animation: pulseGreen 0.5s ease;
-        }
+    .retro-btn-amber:hover {
+      box-shadow: 0 5px 0 #634202, 0 8px 15px rgba(0, 0, 0, 0.6);
+    }
 
-        .code-line.wrong-line {
-            background-color: rgba(248, 81, 73, 0.28) !important;
-            border-left-color: #f85149 !important;
-            animation: shakeHorizontal 0.4s ease;
-        }
+    .retro-btn-amber:active {
+      box-shadow: 0 1px 0 #634202;
+    }
 
-        @keyframes pulseGreen {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.01); }
-            100% { transform: scale(1); }
-        }
+    /* Top HUD */
+    #hud {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      pointer-events: none;
+      z-index: 15;
+    }
 
-        @keyframes shakeHorizontal {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-6px); }
-            40%, 80% { transform: translateX(6px); }
-        }
+    .hud-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      pointer-events: auto;
+    }
 
-        @keyframes floatBob {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-5px); }
-        }
+    .hud-card {
+      background: rgba(22, 27, 34, 0.92);
+      border: 2px solid var(--panel-border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
 
-        .animate-bob {
-            animation: floatBob 1.6s ease-in-out infinite;
-        }
+    .hud-label {
+      font-family: var(--pixel-font);
+      font-size: 8px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
 
-        /* Custom Scrollbar for Code View */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0d1117;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #30363d;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #484f58;
-        }
+    .hud-value {
+      font-family: var(--pixel-font);
+      font-size: 12px;
+      color: var(--text-main);
+    }
 
-        /* CRT subtle scanline overlay */
-        .crt-overlay {
-            background: linear-gradient(
-                rgba(18, 16, 16, 0) 50%, 
-                rgba(0, 0, 0, 0.14) 50%
-            );
-            background-size: 100% 4px;
-            pointer-events: none;
-        }
-    </style>
+    .hud-value.green { color: var(--accent-green); }
+    .hud-value.blue { color: var(--accent-blue); }
+    .hud-value.amber { color: var(--accent-amber); }
+    .hud-value.purple { color: var(--accent-purple); }
+
+    /* Toast / Notification Banner */
+    #toast-banner {
+      position: fixed;
+      top: 76px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: rgba(22, 27, 34, 0.96);
+      border: 2px solid var(--accent-amber);
+      color: var(--text-main);
+      font-family: var(--pixel-font);
+      font-size: 10px;
+      line-height: 1.5;
+      padding: 10px 16px;
+      border-radius: 6px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 20;
+      text-align: center;
+      max-width: 90vw;
+    }
+
+    #toast-banner.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Action Prompt near bottom */
+    #interact-prompt {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(13, 17, 23, 0.94);
+      border: 2px solid var(--accent-green);
+      color: var(--text-main);
+      font-family: var(--pixel-font);
+      font-size: 10px;
+      padding: 10px 16px;
+      border-radius: 6px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+      display: none;
+      z-index: 15;
+      text-align: center;
+    }
+
+    /* Touch Controls for Mobile / Small Screens */
+    #touch-controls {
+      position: fixed;
+      bottom: 16px;
+      left: 16px;
+      display: none;
+      grid-template-columns: repeat(3, 46px);
+      grid-template-rows: repeat(3, 46px);
+      gap: 4px;
+      z-index: 16;
+    }
+
+    .dpad-btn {
+      background: rgba(22, 27, 34, 0.88);
+      border: 2px solid var(--panel-border);
+      color: var(--text-main);
+      font-family: var(--pixel-font);
+      font-size: 12px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .dpad-btn:active {
+      background: var(--accent-blue);
+      color: #0d1117;
+    }
+
+    @media (max-width: 768px) {
+      #touch-controls {
+        display: grid;
+      }
+      .hud-card {
+        padding: 6px 9px;
+      }
+      .hud-value {
+        font-size: 10px;
+      }
+    }
+
+    /* Overlay & Modal System */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 8, 12, 0.82);
+      backdrop-filter: blur(3px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 30;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 780px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: var(--panel-bg);
+      border: 3px solid var(--panel-border);
+      border-radius: 8px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      padding: 22px;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 2px solid var(--panel-border);
+      padding-bottom: 14px;
+      margin-bottom: 16px;
+    }
+
+    .pr-title {
+      font-family: var(--pixel-font);
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--accent-blue);
+      margin: 0 0 6px 0;
+    }
+
+    .pr-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .pr-badge {
+      display: inline-block;
+      font-family: var(--pixel-font);
+      font-size: 9px;
+      padding: 5px 8px;
+      border-radius: 4px;
+      background: rgba(188, 140, 255, 0.15);
+      border: 1px solid var(--accent-purple);
+      color: var(--accent-purple);
+      white-space: nowrap;
+    }
+
+    .pr-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .pr-instruction {
+      font-size: 13px;
+      color: var(--text-main);
+      margin: 0;
+    }
+
+    #hint-banner {
+      display: none;
+      background: rgba(210, 153, 34, 0.14);
+      border: 1px solid var(--accent-amber);
+      border-left: 4px solid var(--accent-amber);
+      border-radius: 6px;
+      padding: 11px 14px;
+      margin-bottom: 14px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #f3d078;
+    }
+
+    #hint-banner.visible {
+      display: block;
+    }
+
+    /* Code Diff Viewer */
+    .code-container {
+      background: #090c10;
+      border: 2px solid var(--panel-border);
+      border-radius: 6px;
+      overflow-x: auto;
+      margin-bottom: 16px;
+    }
+
+    .code-line {
+      display: flex;
+      align-items: stretch;
+      font-family: var(--code-font);
+      font-size: 13px;
+      line-height: 1.6;
+      cursor: pointer;
+      border-left: 4px solid transparent;
+      transition: background 0.12s ease;
+    }
+
+    .code-line:hover {
+      background: rgba(88, 166, 255, 0.12);
+      border-left-color: var(--accent-blue);
+    }
+
+    .code-line.correct {
+      background: rgba(63, 185, 80, 0.22);
+      border-left-color: var(--accent-green);
+    }
+
+    .code-line.wrong {
+      background: rgba(248, 81, 73, 0.22);
+      border-left-color: var(--accent-red);
+    }
+
+    .line-num {
+      width: 44px;
+      min-width: 44px;
+      text-align: right;
+      padding: 4px 10px 4px 6px;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.02);
+      border-right: 1px solid #21262d;
+      user-select: none;
+    }
+
+    .line-code {
+      padding: 4px 14px;
+      white-space: pre;
+      color: var(--text-main);
+    }
+
+    /* Feedback Box inside Modal */
+    #review-feedback {
+      display: none;
+      padding: 14px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    #review-feedback.success {
+      display: block;
+      background: rgba(63, 185, 80, 0.14);
+      border: 1px solid var(--accent-green);
+      color: #aff5b4;
+    }
+
+    #review-feedback.error {
+      display: block;
+      background: rgba(248, 81, 73, 0.14);
+      border: 1px solid var(--accent-red);
+      color: #ffa198;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* Start Screen */
+    #start-screen {
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 12, 16, 0.94);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 40;
+    }
+
+    .start-card {
+      max-width: 640px;
+      width: 100%;
+      background: var(--panel-bg);
+      border: 3px solid var(--accent-green);
+      border-radius: 8px;
+      padding: 28px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
+      text-align: center;
+    }
+
+    .start-title {
+      font-family: var(--pixel-font);
+      font-size: 20px;
+      line-height: 1.5;
+      color: var(--accent-green);
+      margin: 0 0 10px 0;
+    }
+
+    .start-sub {
+      font-family: var(--pixel-font);
+      font-size: 10px;
+      color: var(--accent-blue);
+      margin: 0 0 18px 0;
+    }
+
+    .start-desc {
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--text-main);
+      margin: 0 0 20px 0;
+      text-align: left;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-bottom: 22px;
+      text-align: left;
+    }
+
+    .control-item {
+      background: #0d1117;
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .control-item strong {
+      display: block;
+      font-family: var(--pixel-font);
+      font-size: 9px;
+      color: var(--accent-amber);
+      margin-bottom: 4px;
+    }
+  </style>
 </head>
-<body class="bg-[#0d1117] text-[#e6edf3] select-none">
+<body>
+  <div id="game-wrap">
+    <canvas id="office-canvas" width="960" height="600"></canvas>
 
-    <!-- TOP HUD BAR -->
-    <header id="hudBar" class="w-full bg-[#161b22] border-b-2 border-[#30363d] px-3 py-2 sm:px-5 sm:py-2.5 flex flex-wrap items-center justify-between gap-2 z-20 shadow-lg">
-        <!-- Left: Title & Rank Badge -->
-        <div class="flex items-center gap-3">
-            <div class="flex items-center gap-2">
-                <span class="text-xl sm:text-2xl">🐛</span>
-                <div>
-                    <h1 class="font-pixel text-[10px] sm:text-xs text-[#58a6ff] tracking-wider">BUG HUNTER</h1>
-                    <div class="flex items-center gap-1.5 mt-1">
-                        <span class="text-[10px] uppercase tracking-wider text-[#8b949e] font-semibold">Role:</span>
-                        <span id="rankDisplay" class="px-2 py-0.5 text-[10px] sm:text-xs font-bold rounded bg-[#1f6feb]/20 text-[#58a6ff] border border-[#58a6ff]/40">
-                            Intern
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Caffeine Buff Indicator -->
-            <div id="buffBadge" class="hidden items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-300 text-xs font-semibold animate-pulse">
-                <span>☕</span>
-                <span class="hidden md:inline">Caffeinated!</span>
-                <span id="buffTimer" class="font-code font-bold">15s</span>
-            </div>
+    <!-- Top HUD (Speedrun timer removed in v0.1) -->
+    <div id="hud">
+      <div class="hud-group">
+        <div class="hud-card">
+          <span class="hud-label">ROLE</span>
+          <span id="hud-role" class="hud-value purple">INTERN</span>
         </div>
-
-        <!-- Center: Credibility Hearts & Shift Timer -->
-        <div class="flex items-center gap-4 sm:gap-6">
-            <!-- Tech Lead Credibility -->
-            <div class="flex flex-col items-center">
-                <span class="text-[9px] sm:text-[10px] uppercase tracking-wider text-[#8b949e] font-bold mb-0.5">Credibility</span>
-                <div id="heartsContainer" class="flex items-center gap-1 text-sm sm:text-base" title="Tech Lead Trust">
-                    <span>❤️</span><span>❤️</span><span>❤️</span>
-                </div>
-            </div>
-
-            <!-- Sprint Timer -->
-            <div class="flex flex-col items-center bg-[#0d1117] px-3 py-1 rounded-lg border border-[#30363d]">
-                <span class="text-[9px] uppercase tracking-wider text-[#8b949e] font-bold">Sprint Ends</span>
-                <span id="timerDisplay" class="font-code text-sm sm:text-base font-bold text-[#3fb950]">01:30</span>
-            </div>
+        <div class="hud-card">
+          <span class="hud-label">SCORE</span>
+          <span id="hud-score" class="hud-value green">0</span>
         </div>
-
-        <!-- Right: Score, Streak & Mute -->
-        <div class="flex items-center gap-3 sm:gap-4">
-            <div class="text-right">
-                <div class="flex items-center justify-end gap-1.5">
-                    <span id="streakBadge" class="hidden px-1.5 py-0.5 text-[10px] font-bold rounded bg-purple-500/20 text-purple-300 border border-purple-500/40">
-                        🔥 2x
-                    </span>
-                    <span class="text-[10px] uppercase tracking-wider text-[#8b949e] font-bold">Score</span>
-                </div>
-                <div id="scoreDisplay" class="font-pixel text-xs sm:text-sm text-[#f0883e] mt-0.5">0000</div>
-            </div>
-
-            <button id="muteBtn" class="p-2 rounded-lg bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-base transition-colors" title="Toggle Audio">
-                🔊
-            </button>
+        <div class="hud-card">
+          <span class="hud-label">BUGS CAUGHT</span>
+          <span id="hud-caught" class="hud-value blue">0 / 10</span>
         </div>
-    </header>
-
-    <!-- MAIN GAME AREA -->
-    <main class="relative flex-1 w-full h-full overflow-hidden flex items-center justify-center bg-[#090c10]">
-        <!-- 2D Office Canvas -->
-        <canvas id="officeCanvas"></canvas>
-
-        <!-- Subtle Retro Scanlines -->
-        <div class="crt-overlay absolute inset-0 z-10"></div>
-
-        <!-- Floating Notification Toast (Top Center of Canvas) -->
-        <div id="toastBanner" class="pointer-events-none absolute top-4 left-1/2 -translate-x-1/2 z-20 transition-all duration-300 opacity-0 -translate-y-3">
-            <div class="bg-[#161b22]/95 border-2 border-[#58a6ff] px-4 py-2 rounded-full shadow-2xl flex items-center gap-2.5 backdrop-blur-sm">
-                <span id="toastIcon" class="text-lg">🔔</span>
-                <span id="toastText" class="text-xs sm:text-sm font-semibold text-white whitespace-nowrap">New Pull Request assigned!</span>
-            </div>
+        <div class="hud-card">
+          <span class="hud-label">STREAK</span>
+          <span id="hud-streak" class="hud-value amber">0x</span>
         </div>
+      </div>
 
-        <!-- Context Interaction Prompt (Bottom Center above Mobile Controls) -->
-        <div id="interactPrompt" class="hidden absolute bottom-24 sm:bottom-8 left-1/2 -translate-x-1/2 z-20 animate-bob">
-            <button id="interactPromptBtn" class="bg-[#161b22]/95 hover:bg-[#1f242c] border-2 border-[#3fb950] text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2.5 cursor-pointer">
-                <span class="px-2 py-0.5 bg-[#3fb950] text-[#0d1117] font-pixel text-[10px] rounded">E / SPACE</span>
-                <span id="interactPromptText" class="text-xs sm:text-sm font-bold text-[#e6edf3]">Inspect Pull Request</span>
-            </button>
+      <div class="hud-group">
+        <div id="boost-pill" class="hud-card" style="display: none; border-color: var(--accent-amber);">
+          <span class="hud-label">ESPRESSO BOOST</span>
+          <span id="hud-boost" class="hud-value amber">15.0s</span>
         </div>
+        <button id="mute-btn" class="retro-btn retro-btn-blue" type="button">SFX: ON</button>
+      </div>
+    </div>
 
-        <!-- Mobile / Touch Controls (Visible on touch/small screens) -->
-        <div id="mobileControls" class="sm:hidden absolute bottom-4 inset-x-4 z-20 flex items-end justify-between pointer-events-none">
-            <!-- D-Pad -->
-            <div class="grid grid-cols-3 gap-1.5 w-36 h-36 pointer-events-auto opacity-85">
-                <div></div>
-                <button data-dir="up" class="dpad-btn bg-[#21262d]/90 active:bg-[#58a6ff] border-2 border-[#30363d] rounded-xl flex items-center justify-center text-xl shadow-lg">▲</button>
-                <div></div>
-                <button data-dir="left" class="dpad-btn bg-[#21262d]/90 active:bg-[#58a6ff] border-2 border-[#30363d] rounded-xl flex items-center justify-center text-xl shadow-lg">◀</button>
-                <div class="bg-[#161b22]/60 rounded-xl border border-[#30363d]/50"></div>
-                <button data-dir="right" class="dpad-btn bg-[#21262d]/90 active:bg-[#58a6ff] border-2 border-[#30363d] rounded-xl flex items-center justify-center text-xl shadow-lg">▶</button>
-                <div></div>
-                <button data-dir="down" class="dpad-btn bg-[#21262d]/90 active:bg-[#58a6ff] border-2 border-[#30363d] rounded-xl flex items-center justify-center text-xl shadow-lg">▼</button>
-                <div></div>
-            </div>
+    <div id="toast-banner"></div>
+    <div id="interact-prompt"></div>
 
-            <!-- Action Button -->
-            <button id="mobileActionBtn" class="pointer-events-auto w-20 h-20 rounded-full bg-[#238636]/90 active:bg-[#3fb950] border-4 border-[#3fb950] shadow-xl flex flex-col items-center justify-center text-white font-pixel text-[10px] gap-1 opacity-90">
-                <span class="text-lg">💻</span>
-                <span>USE</span>
-            </button>
+    <!-- Mobile D-Pad -->
+    <div id="touch-controls" aria-label="Movement controls">
+      <div></div>
+      <button class="dpad-btn" data-dir="up" type="button">▲</button>
+      <div></div>
+      <button class="dpad-btn" data-dir="left" type="button">◀</button>
+      <button class="dpad-btn" data-dir="down" type="button">▼</button>
+      <button class="dpad-btn" data-dir="right" type="button">▶</button>
+    </div>
+  </div>
+
+  <!-- Start Screen -->
+  <div id="start-screen">
+    <div class="start-card">
+      <h1 class="start-title">BUG HUNTER</h1>
+      <div class="start-sub">JUNIOR DEV EDITION • V0.1 (RELAXED PACE + HINTS)</div>
+      <p class="start-desc">
+        Senior developers are shipping pull requests fast—and leaving sneaky bugs behind.
+        Walk to your glowing workstation to inspect incoming diffs, click the buggy line of code,
+        and use <strong>Show Hint</strong> whenever you want a clue. No speedrun clock—take your time!
+      </p>
+      <div class="controls-grid">
+        <div class="control-item">
+          <strong>MOVE AROUND</strong>
+          WASD or Arrow Keys (or D-Pad on touch screens)
         </div>
-
-        <!-- ========================================================= -->
-        <!-- 1. START SCREEN OVERLAY                                   -->
-        <!-- ========================================================= -->
-        <div id="startScreen" class="absolute inset-0 z-30 bg-[#0d1117]/90 backdrop-blur-md flex items-center justify-center p-4">
-            <div class="max-w-xl w-full bg-[#161b22] border-2 border-[#30363d] rounded-2xl p-6 sm:p-8 shadow-2xl text-center">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#1f6feb]/20 border-2 border-[#58a6ff] text-4xl mb-4 animate-bob">
-                    🐛
-                </div>
-                <h2 class="font-pixel text-lg sm:text-2xl text-[#58a6ff] leading-relaxed mb-2">
-                    BUG HUNTER
-                </h2>
-                <p class="font-pixel text-[10px] sm:text-xs text-[#3fb950] mb-5">
-                    JUNIOR DEV EDITION
-                </p>
-
-                <p class="text-sm sm:text-base text-[#c9d1d9] leading-relaxed mb-6">
-                    Welcome to your first day at <span class="text-white font-semibold">ShipFast Tech</span>! Senior devs keep pushing sloppy hotfixes right before Friday deployment. Walk to your glowing desk, review their Pull Requests, and click the buggy line before prod explodes!
-                </p>
-
-                <!-- How to Play Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left mb-7">
-                    <div class="bg-[#0d1117] p-3.5 rounded-xl border border-[#30363d]">
-                        <div class="text-lg mb-1">🕹️ Move</div>
-                        <p class="text-xs text-[#8b949e]">Use <span class="text-white font-code">WASD</span> or <span class="text-white font-code">Arrows</span> to walk around the office.</p>
-                    </div>
-                    <div class="bg-[#0d1117] p-3.5 rounded-xl border border-[#30363d]">
-                        <div class="text-lg mb-1">💻 Review PRs</div>
-                        <p class="text-xs text-[#8b949e]">Press <span class="text-white font-code">E</span> or <span class="text-white font-code">Space</span> at your desk, then click the buggy line.</p>
-                    </div>
-                    <div class="bg-[#0d1117] p-3.5 rounded-xl border border-[#30363d]">
-                        <div class="text-lg mb-1">☕ Espresso</div>
-                        <p class="text-xs text-[#8b949e]">Visit the breakroom coffee machine for a temporary speed boost!</p>
-                    </div>
-                </div>
-
-                <button id="startGameBtn" class="retro-btn w-full sm:w-auto px-8 py-4 rounded-xl text-white text-xs sm:text-sm tracking-wider">
-                    START SHIFT 🚀
-                </button>
-            </div>
+        <div class="control-item">
+          <strong>REVIEW CODE</strong>
+          Walk to your desk &amp; press Space / Enter or click the desk
         </div>
-
-        <!-- ========================================================= -->
-        <!-- 2. CODE REVIEW / IDE MODAL OVERLAY                        -->
-        <!-- ========================================================= -->
-        <div id="codeModal" class="hidden absolute inset-0 z-40 bg-black/75 backdrop-blur-sm flex items-center justify-center p-2 sm:p-6">
-            <div class="w-full max-w-3xl max-h-[92vh] bg-[#161b22] border-2 border-[#30363d] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
-                
-                <!-- IDE Window Top Bar -->
-                <div class="bg-[#0d1117] px-4 py-3 border-b border-[#30363d] flex items-center justify-between gap-2">
-                    <div class="flex items-center gap-2">
-                        <span class="w-3 h-3 rounded-full bg-[#ff5f56]"></span>
-                        <span class="w-3 h-3 rounded-full bg-[#ffbd2e]"></span>
-                        <span class="w-3 h-3 rounded-full bg-[#27c93f]"></span>
-                        <span id="prNumberBadge" class="ml-2 font-code text-xs text-[#8b949e] bg-[#21262d] px-2 py-0.5 rounded">
-                            PR #402
-                        </span>
-                        <span id="prLangBadge" class="font-code text-xs text-[#58a6ff] bg-[#1f6feb]/15 border border-[#58a6ff]/30 px-2 py-0.5 rounded">
-                            JavaScript
-                        </span>
-                    </div>
-                    <button id="closeModalBtn" class="text-xs text-[#8b949e] hover:text-white px-2.5 py-1 rounded bg-[#21262d] hover:bg-[#30363d] transition-colors">
-                        ESC / Stand Up
-                    </button>
-                </div>
-
-                <!-- PR Header Info -->
-                <div class="p-4 sm:px-6 bg-[#161b22] border-b border-[#30363d]">
-                    <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
-                        <h3 id="prTitle" class="text-base sm:text-lg font-bold text-white">
-                            feat: lightning fast user auth check
-                        </h3>
-                        <span id="prAuthor" class="text-xs font-medium px-2.5 py-1 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30">
-                            @chad_10x_dev
-                        </span>
-                    </div>
-                    <p id="prDescription" class="text-xs sm:text-sm text-[#8b949e] italic">
-                        "Quick hotfix before the weekend, didn't test locally because it's trivial. LGTM!"
-                    </p>
-                </div>
-
-                <!-- Instruction Strip -->
-                <div class="bg-[#1f6feb]/10 border-b border-[#1f6feb]/30 px-4 py-2 flex items-center justify-between text-xs text-[#79c0ff]">
-                    <span>🔍 Click on the exact line containing the bug to block this merge:</span>
-                    <span class="hidden sm:inline font-code text-[11px] text-[#8b949e]">1 click = 1 review comment</span>
-                </div>
-
-                <!-- Code Snippet Viewer -->
-                <div class="flex-1 overflow-y-auto bg-[#0d1117] p-3 sm:p-4 font-code text-xs sm:text-sm">
-                    <div class="text-[11px] text-[#8b949e] pb-2 mb-2 border-b border-[#21262d] flex items-center justify-between">
-                        <span id="prFileName">📄 src/auth/loginController.js</span>
-                        <span>+12 -4 lines changed</span>
-                    </div>
-                    <div id="codeLinesContainer" class="space-y-0.5">
-                        <!-- Code lines injected dynamically -->
-                    </div>
-                </div>
-
-                <!-- Review Feedback Panel (Appears after clicking a line) -->
-                <div id="reviewFeedbackBox" class="hidden p-4 sm:px-6 border-t-2 border-[#30363d] bg-[#161b22]">
-                    <div class="flex items-start gap-3">
-                        <div id="feedbackIcon" class="text-2xl sm:text-3xl mt-0.5">✅</div>
-                        <div class="flex-1">
-                            <h4 id="feedbackTitle" class="font-pixel text-xs sm:text-sm text-[#3fb950] mb-1.5">
-                                BUG CAUGHT! +150 PTS
-                            </h4>
-                            <p id="feedbackExplanation" class="text-xs sm:text-sm text-[#c9d1d9] leading-relaxed">
-                                Classic assignment (=) inside an if-condition instead of strict equality (===)! That would have logged everyone in as admin.
-                            </p>
-                        </div>
-                        <button id="nextPrBtn" class="retro-btn px-4 py-2.5 rounded-xl text-white text-[10px] sm:text-xs whitespace-nowrap self-center">
-                            NEXT PR ➔
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <div class="control-item">
+          <strong>COFFEE BOOST</strong>
+          Visit the breakroom espresso machine for faster movement
         </div>
+      </div>
+      <button id="start-btn" class="retro-btn" type="button">START SHIFT (V0.1)</button>
+    </div>
+  </div>
 
-        <!-- ========================================================= -->
-        <!-- 3. SHIFT SUMMARY / GAME OVER OVERLAY                      -->
-        <!-- ========================================================= -->
-        <div id="gameOverScreen" class="hidden absolute inset-0 z-40 bg-[#0d1117]/92 backdrop-blur-md flex items-center justify-center p-4">
-            <div class="max-w-lg w-full bg-[#161b22] border-2 border-[#30363d] rounded-2xl p-6 sm:p-8 shadow-2xl text-center">
-                <div id="gameOverEmoji" class="text-5xl mb-3">🏆</div>
-                <h2 id="gameOverTitle" class="font-pixel text-base sm:text-xl text-[#f0883e] mb-2">
-                    SPRINT COMPLETE!
-                </h2>
-                <p id="gameOverSubtitle" class="text-xs sm:text-sm text-[#8b949e] mb-6">
-                    Production survived another Friday deployment thanks to your eagle eyes.
-                </p>
-
-                <!-- Stats Card -->
-                <div class="bg-[#0d1117] border border-[#30363d] rounded-xl p-4 mb-6 space-y-3 text-sm">
-                    <div class="flex justify-between items-center border-b border-[#21262d] pb-2">
-                        <span class="text-[#8b949e]">Final Score</span>
-                        <span id="finalScore" class="font-pixel text-sm text-[#3fb950]">1250</span>
-                    </div>
-                    <div class="flex justify-between items-center border-b border-[#21262d] pb-2">
-                        <span class="text-[#8b949e]">Final Promotion</span>
-                        <span id="finalRank" class="font-bold text-[#58a6ff]">Senior Dev</span>
-                    </div>
-                    <div class="flex justify-between items-center border-b border-[#21262d] pb-2">
-                        <span class="text-[#8b949e]">Bugs Caught</span>
-                        <span id="finalBugs" class="font-code font-bold text-white">8</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-[#8b949e]">Review Accuracy</span>
-                        <span id="finalAccuracy" class="font-code font-bold text-amber-300">89%</span>
-                    </div>
-                </div>
-
-                <button id="restartBtn" class="retro-btn w-full py-4 rounded-xl text-white text-xs sm:text-sm tracking-wider">
-                    PLAY NEXT SPRINT 🔄
-                </button>
-            </div>
+  <!-- Pull Request Review Modal -->
+  <div id="pr-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="pr-modal-title">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h2 id="pr-modal-title" class="pr-title">PR #101</h2>
+          <div id="pr-modal-meta" class="pr-meta">Author: Senior Dev</div>
         </div>
-    </main>
+        <span id="pr-lang-badge" class="pr-badge">JAVASCRIPT</span>
+      </div>
 
-    <script>
-        /**
-         * ============================================================================
-         * AUDIO SYNTHESIZER (Web Audio API - Zero External Assets)
-         * ============================================================================
-         */
-        class RetroSoundEngine {
-            constructor() {
-                this.ctx = null;
-                this.muted = false;
-            }
+      <div class="pr-toolbar">
+        <p class="pr-instruction">Click the <strong>exact line</strong> that contains the bug:</p>
+        <button id="hint-btn" class="retro-btn retro-btn-amber" type="button">SHOW HINT</button>
+      </div>
 
-            init() {
-                if (!this.ctx) {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    this.ctx = new AudioContext();
-                }
-                if (this.ctx.state === 'suspended') {
-                    this.ctx.resume();
-                }
-            }
+      <div id="hint-banner"></div>
 
-            toggleMute() {
-                this.muted = !this.muted;
-                return this.muted;
-            }
+      <div id="code-lines" class="code-container"></div>
 
-            playTone(freq, type, duration, vol = 0.1, delay = 0) {
-                if (this.muted) return;
-                this.init();
-                const now = this.ctx.currentTime + delay;
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = type;
-                osc.frequency.setValueAtTime(freq, now);
+      <div id="review-feedback"></div>
 
-                gain.gain.setValueAtTime(vol, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+      <div class="modal-footer">
+        <button id="close-pr-btn" class="retro-btn retro-btn-blue" type="button">BACK TO DESK</button>
+        <button id="next-pr-btn" class="retro-btn" type="button" style="display: none;">NEXT PR</button>
+      </div>
+    </div>
+  </div>
 
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start(now);
-                osc.stop(now + duration);
-            }
+  <script>
+    // --- Synthesized Web Audio SFX ---
+    const AudioEngine = (() => {
+      let ctx = null;
+      let muted = false;
 
-            step() {
-                this.playTone(130 + Math.random() * 25, 'triangle', 0.04, 0.03);
-            }
-
-            newPrPing() {
-                this.playTone(587.33, 'sine', 0.12, 0.09, 0);      // D5
-                this.playTone(880, 'sine', 0.22, 0.09, 0.1);       // A5
-            }
-
-            openDesk() {
-                this.playTone(320, 'square', 0.06, 0.05, 0);
-                this.playTone(480, 'square', 0.08, 0.05, 0.05);
-            }
-
-            bugCaught() {
-                this.playTone(523.25, 'square', 0.1, 0.08, 0);     // C5
-                this.playTone(659.25, 'square', 0.1, 0.08, 0.08);  // E5
-                this.playTone(783.99, 'square', 0.1, 0.08, 0.16);  // G5
-                this.playTone(1046.50, 'square', 0.25, 0.09, 0.24);// C6
-            }
-
-            falseAlarm() {
-                this.playTone(180, 'sawtooth', 0.18, 0.1, 0);
-                this.playTone(135, 'sawtooth', 0.28, 0.1, 0.14);
-            }
-
-            coffeeSlurp() {
-                this.playTone(280, 'sine', 0.08, 0.08, 0);
-                this.playTone(420, 'sine', 0.08, 0.08, 0.07);
-                this.playTone(620, 'sine', 0.14, 0.08, 0.14);
-            }
-
-            promotion() {
-                const notes = [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5];
-                notes.forEach((n, i) => this.playTone(n, 'triangle', 0.14, 0.1, i * 0.09));
-            }
+      function ensureContext() {
+        if (!ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) ctx = new AudioCtx();
         }
-
-        const sfx = new RetroSoundEngine();
-
-        /**
-         * ============================================================================
-         * PULL REQUEST & BUG DATABASE (10 Clever, Realistic Bugs)
-         * ============================================================================
-         */
-        const PR_DATABASE = [
-            {
-                id: 101,
-                title: "feat: ultra-fast admin authentication check",
-                author: "@chad_10x_ninja",
-                desc: "Refactored login to save 2ms. Ship it before standup, LGTM!",
-                lang: "JavaScript",
-                file: "src/auth/verifyAdmin.js",
-                bugLine: 4,
-                explanation: "Assignment operator (=) used instead of strict equality (===)! `user.role = 'admin'` overwrites every user's role to admin and always evaluates to truthy.",
-                lines: [
-                    "export function checkAdminAccess(user) {",
-                    "  if (!user || !user.isLoggedIn) {",
-                    "    return false;",
-                    "  }",
-                    "  if (user.role = 'admin') {",
-                    "    grantProductionDatabaseAccess(user);",
-                    "    return true;",
-                    "  }",
-                    "  return false;",
-                    "}"
-                ]
-            },
-            {
-                id: 102,
-                title: "fix: calculate cart total with discount",
-                author: "@brogrammer_blake",
-                desc: "Loops are easy, why write unit tests for basic addition?",
-                lang: "JavaScript",
-                file: "src/checkout/cartMath.js",
-                bugLine: 3,
-                explanation: "Classic Off-By-One error (`i <= items.length`)! On the final iteration, `items[items.length]` is `undefined`, throwing a TypeError when reading `.price`.",
-                lines: [
-                    "function calculateCartTotal(items, taxRate) {",
-                    "  let subtotal = 0;",
-                    "  // Sum all item prices in the shopping cart",
-                    "  for (let i = 0; i <= items.length; i++) {",
-                    "    subtotal += items[i].price * items[i].qty;",
-                    "  }",
-                    "  const total = subtotal * (1 + taxRate);",
-                    "  return Number(total.toFixed(2));",
-                    "}"
-                ]
-            },
-            {
-                id: 103,
-                title: "chore: connect stripe payment gateway",
-                author: "@senior_steve",
-                desc: "Works on my machine! Pushing straight to main before lunch.",
-                lang: "JavaScript",
-                file: "src/services/stripeConfig.js",
-                bugLine: 3,
-                explanation: "Hardcoded live production API secret key committed directly to source control! Always use `process.env.STRIPE_SECRET_KEY` instead of leaking credentials.",
-                lines: [
-                    "import Stripe from 'stripe';",
-                    "",
-                    "const STRIPE_ENDPOINT = 'https://api.stripe.com/v1';",
-                    "const SECRET_KEY = 'MY_SECRET_API_KEY_12345';",
-                    "",
-                    "export const stripeClient = new Stripe(SECRET_KEY, {",
-                    "  apiVersion: '2026-01-28',",
-                    "  maxNetworkRetries: 2",
-                    "});"
-                ]
-            },
-            {
-                id: 104,
-                title: "feat: async user profile loader",
-                author: "@react_rockstar",
-                desc: "Made profile loading non-blocking and super clean.",
-                lang: "JavaScript",
-                file: "src/api/fetchProfile.js",
-                bugLine: 3,
-                explanation: "Missing `await` before `fetch(...)`! Without `await`, `response` is a pending Promise object, so `response.json()` crashes immediately.",
-                lines: [
-                    "export async function getUserProfile(userId) {",
-                    "  const url = `/api/v2/users/${userId}`;",
-                    "  try {",
-                    "    const response = fetch(url);",
-                    "    const data = await response.json();",
-                    "    return data.profile;",
-                    "  } catch (err) {",
-                    "    console.error('Profile load failed', err);",
-                    "  }",
-                    "}"
-                ]
-            },
-            {
-                id: 105,
-                title: "fix: retry queue worker until empty",
-                author: "@arch_wizard_dan",
-                desc: "Self-healing queue processor. Zero chance of hanging.",
-                lang: "Python",
-                file: "workers/email_dispatcher.py",
-                bugLine: 4,
-                explanation: "Infinite `while` loop! `pending_jobs` is never popped or decremented inside the loop body, so `len(pending_jobs) > 0` stays true forever and melts the CPU.",
-                lines: [
-                    "def flush_email_queue(pending_jobs):",
-                    "    sent_count = 0",
-                    "    if not pending_jobs:",
-                    "        return 0",
-                    "    while len(pending_jobs) > 0:",
-                    "        job = pending_jobs[0]",
-                    "        send_smtp_email(job.recipient, job.body)",
-                    "        sent_count += 1",
-                    "    return sent_count"
-                ]
-            },
-            {
-                id: 106,
-                title: "feat: compute user conversion rate",
-                author: "@metrics_mike",
-                desc: "Added analytics KPI card for the investor deck.",
-                lang: "JavaScript",
-                file: "src/analytics/kpi.js",
-                bugLine: 4,
-                explanation: "Division by zero! When a new campaign has `0` visitors, `clicks / visitors` produces `NaN` or `Infinity` across the executive dashboard.",
-                lines: [
-                    "export function getConversionPercentage(stats) {",
-                    "  const clicks = stats.totalClicks || 0;",
-                    "  const visitors = stats.uniqueVisitors || 0;",
-                    "  // Calculate percentage ratio",
-                    "  const ratio = (clicks / visitors) * 100;",
-                    "  return `${ratio.toFixed(1)}%`;",
-                    "}"
-                ]
-            },
-            {
-                id: 107,
-                title: "fix: add todo item to state list",
-                author: "@hooks_guru",
-                desc: "Quick state update fix so the UI feels snappier.",
-                lang: "React / JS",
-                file: "src/components/TodoBoard.jsx",
-                bugLine: 3,
-                explanation: "Direct state mutation (`todos.push(newItem)`)! Mutating React state in place keeps the same array reference, so React skips re-rendering the component.",
-                lines: [
-                    "function TodoBoard({ todos, setTodos }) {",
-                    "  const handleAddTask = (title) => {",
-                    "    const newItem = { id: Date.now(), title };",
-                    "    todos.push(newItem);",
-                    "    setTodos(todos);",
-                    "  };",
-                    "  return <TaskList items={todos} onAdd={handleAddTask} />;",
-                    "}"
-                ]
-            },
-            {
-                id: 108,
-                title: "refactor: clean up shipping address formatter",
-                author: "@clean_code_carl",
-                desc: "Renamed variables for clarity. Did not run linter.",
-                lang: "JavaScript",
-                file: "src/utils/formatAddress.js",
-                bugLine: 5,
-                explanation: "ReferenceError due to wrong variable name (`zipCode` instead of `postalCode`)! The parameter was renamed to `postalCode`, leaving `zipCode` undefined.",
-                lines: [
-                    "export function formatShippingLabel(customer) {",
-                    "  const { fullName, street, city, postalCode } = customer;",
-                    "  if (!street || !city) {",
-                    "    throw new Error('Incomplete shipping address');",
-                    "  }",
-                    "  return `${fullName}\\n${street}\\n${city}, ${zipCode}`;",
-                    "}"
-                ]
-            },
-            {
-                id: 109,
-                title: "fix: allow dark mode toggle on mobile",
-                author: "@css_cowboy",
-                desc: "Fixed button clickability issue in 10 seconds.",
-                lang: "CSS / HTML",
-                file: "src/styles/themeButton.css",
-                bugLine: 5,
-                explanation: "`pointer-events: none;` completely disables all mouse clicks and touch taps on `.theme-toggle-btn`, making the button impossible to press!",
-                lines: [
-                    ".theme-toggle-btn {",
-                    "  background-color: #1f6feb;",
-                    "  color: #ffffff;",
-                    "  border-radius: 8px;",
-                    "  cursor: pointer;",
-                    "  pointer-events: none;",
-                    "  padding: 10px 16px;",
-                    "}"
-                ]
-            },
-            {
-                id: 110,
-                title: "feat: delete inactive trial accounts",
-                author: "@db_destroyer",
-                desc: "Automated cleanup script for expired trials.",
-                lang: "SQL / JS",
-                file: "src/jobs/purgeTrials.js",
-                bugLine: 3,
-                explanation: "Missing `WHERE` clause in `DELETE FROM users`! Running this query wipes out every single paying customer and admin in the entire database.",
-                lines: [
-                    "export async function purgeExpiredTrials(db) {",
-                    "  console.log('Starting nightly trial cleanup...');",
-                    "  const query = `",
-                    "    DELETE FROM users;",
-                    "  `;",
-                    "  const result = await db.execute(query);",
-                    "  return result.affectedRows;",
-                    "}"
-                ]
-            }
-        ];
-
-        /**
-         * ============================================================================
-         * GAME STATE & CONFIGURATION
-         * ============================================================================
-         */
-        const RANKS = [
-            { minBugs: 0, title: "Intern" },
-            { minBugs: 2, title: "Junior Dev" },
-            { minBugs: 4, title: "Mid-Level Dev" },
-            { minBugs: 6, title: "Senior Dev" },
-            { minBugs: 9, title: "Staff Engineer" }
-        ];
-
-        const state = {
-            screen: 'START', // START, PLAYING, REVIEWING, GAMEOVER
-            score: 0,
-            credibility: 3,
-            maxCredibility: 3,
-            timeLeft: 90, // 90 second sprint
-            bugsCaught: 0,
-            totalAttempts: 0,
-            streak: 0,
-            caffeineTimer: 0,
-            hasPendingPR: true,
-            currentPR: null,
-            usedPRIds: [],
-            prCounter: 401,
-            prResolved: false,
-            lastStepSound: 0,
-            animTime: 0
-        };
-
-        // Office World Grid (16 cols x 11 rows, tile size computed dynamically)
-        const WORLD_COLS = 16;
-        const WORLD_ROWS = 11;
-
-        // Player Object (in grid coordinates)
-        const player = {
-            x: 7.5,
-            y: 7.5,
-            radius: 0.34,
-            baseSpeed: 4.3,
-            dir: 'down',
-            moving: false,
-            walkFrame: 0
-        };
-
-        // Interactive Stations & Furniture
-        // Types: 'player_desk', 'coworker_desk', 'coffee', 'plant', 'whiteboard', 'server'
-        const FURNITURE = [
-            // Top wall decor
-            { id: 'wb1', type: 'whiteboard', x: 3, y: 0.6, w: 3, h: 0.7 },
-            { id: 'srv1', type: 'server', x: 13.5, y: 0.7, w: 1.5, h: 1.1 },
-
-            // Coffee Station (Top Left Break Area)
-            { id: 'coffee_station', type: 'coffee', x: 1.0, y: 1.4, w: 1.6, h: 1.1, label: 'Espresso Machine' },
-
-            // Coworker Desks
-            { id: 'desk_senior1', type: 'coworker_desk', x: 4.5, y: 2.8, w: 2.2, h: 1.2, devName: 'Chad (10x)', shirt: '#8957e5', hair: '#f0883e' },
-            { id: 'desk_senior2', type: 'coworker_desk', x: 9.5, y: 2.8, w: 2.2, h: 1.2, devName: 'Steve (Sr)', shirt: '#da3633', hair: '#8b949e' },
-            { id: 'desk_senior3', type: 'coworker_desk', x: 11.5, y: 7.2, w: 2.2, h: 1.2, devName: 'Blake (Lead)', shirt: '#d29922', hair: '#3fb950' },
-
-            // Player's Own Workstation (Bottom Left/Center)
-            { id: 'my_desk', type: 'player_desk', x: 3.2, y: 7.2, w: 2.4, h: 1.25, label: 'Your Workstation' },
-
-            // Potted Plants (collision obstacles + cozy vibe)
-            { id: 'plant1', type: 'plant', x: 0.8, y: 9.2, w: 0.9, h: 0.9 },
-            { id: 'plant2', type: 'plant', x: 14.3, y: 9.2, w: 0.9, h: 0.9 },
-            { id: 'plant3', type: 'plant', x: 7.5, y: 2.6, w: 0.9, h: 0.9 },
-            { id: 'plant4', type: 'plant', x: 0.8, y: 5.0, w: 0.9, h: 0.9 }
-        ];
-
-        // Input Tracking
-        const keys = {
-            up: false,
-            down: false,
-            left: false,
-            right: false
-        };
-
-        /**
-         * ============================================================================
-         * DOM REFERENCES
-         * ============================================================================
-         */
-        const canvas = document.getElementById('officeCanvas');
-        const ctx = canvas.getContext('2d');
-
-        const hudScore = document.getElementById('scoreDisplay');
-        const hudTimer = document.getElementById('timerDisplay');
-        const hudHearts = document.getElementById('heartsContainer');
-        const hudRank = document.getElementById('rankDisplay');
-        const hudStreak = document.getElementById('streakBadge');
-        const buffBadge = document.getElementById('buffBadge');
-        const buffTimerEl = document.getElementById('buffTimer');
-
-        const toastBanner = document.getElementById('toastBanner');
-        const toastIcon = document.getElementById('toastIcon');
-        const toastText = document.getElementById('toastText');
-
-        const interactPrompt = document.getElementById('interactPrompt');
-        const interactPromptText = document.getElementById('interactPromptText');
-        const interactPromptBtn = document.getElementById('interactPromptBtn');
-
-        const startScreen = document.getElementById('startScreen');
-        const codeModal = document.getElementById('codeModal');
-        const gameOverScreen = document.getElementById('gameOverScreen');
-
-        /**
-         * ============================================================================
-         * HELPER FUNCTIONS (TOASTS, RANKS, HUD, PR SELECTION)
-         * ============================================================================
-         */
-        let toastTimeout = null;
-        function showToast(icon, message) {
-            toastIcon.textContent = icon;
-            toastText.textContent = message;
-            toastBanner.classList.remove('opacity-0', '-translate-y-3');
-            toastBanner.classList.add('opacity-100', 'translate-y-0');
-
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toastBanner.classList.remove('opacity-100', 'translate-y-0');
-                toastBanner.classList.add('opacity-0', '-translate-y-3');
-            }, 2600);
+        if (ctx && ctx.state === 'suspended') {
+          ctx.resume().catch(() => {});
         }
+      }
 
-        function updateHUD() {
-            hudScore.textContent = String(state.score).padStart(4, '0');
+      function tone(freq, duration, type = 'square', gainVal = 0.06, delay = 0) {
+        if (muted) return;
+        ensureContext();
+        if (!ctx) return;
 
-            // Format MM:SS
-            const mins = Math.floor(Math.max(0, state.timeLeft) / 60);
-            const secs = Math.floor(Math.max(0, state.timeLeft) % 60);
-            hudTimer.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-            hudTimer.className = `font-code text-sm sm:text-base font-bold ${
-                state.timeLeft <= 15 ? 'text-[#f85149] animate-pulse' : 'text-[#3fb950]'
-            }`;
+        const now = ctx.currentTime + delay;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
 
-            // Hearts
-            let heartsHTML = '';
-            for (let i = 0; i < state.maxCredibility; i++) {
-                heartsHTML += i < state.credibility ? '<span>❤️</span>' : '<span class="opacity-25">🖤</span>';
-            }
-            hudHearts.innerHTML = heartsHTML;
+        gain.gain.setValueAtTime(gainVal, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
 
-            // Rank
-            let currentRank = RANKS[0].title;
-            for (const r of RANKS) {
-                if (state.bugsCaught >= r.minBugs) currentRank = r.title;
-            }
-            if (hudRank.textContent !== currentRank && state.bugsCaught > 0) {
-                sfx.promotion();
-                showToast('🎉', `Promoted to ${currentRank}!`);
-            }
-            hudRank.textContent = currentRank;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration);
+      }
 
-            // Streak
-            if (state.streak >= 2) {
-                hudStreak.classList.remove('hidden');
-                hudStreak.textContent = `🔥 ${state.streak}x`;
-            } else {
-                hudStreak.classList.add('hidden');
-            }
-
-            // Caffeine Buff
-            if (state.caffeineTimer > 0) {
-                buffBadge.classList.remove('hidden');
-                buffBadge.classList.add('flex');
-                buffTimerEl.textContent = `${Math.ceil(state.caffeineTimer)}s`;
-            } else {
-                buffBadge.classList.add('hidden');
-                buffBadge.classList.remove('flex');
-            }
+      return {
+        toggleMute() {
+          muted = !muted;
+          return muted;
+        },
+        isMuted() {
+          return muted;
+        },
+        ping() {
+          tone(784, 0.09, 'square', 0.05, 0);
+          tone(1046, 0.12, 'square', 0.05, 0.09);
+        },
+        hint() {
+          tone(659, 0.08, 'triangle', 0.06, 0);
+          tone(880, 0.1, 'triangle', 0.06, 0.08);
+        },
+        success() {
+          tone(523.25, 0.09, 'square', 0.06, 0);
+          tone(659.25, 0.09, 'square', 0.06, 0.09);
+          tone(783.99, 0.09, 'square', 0.06, 0.18);
+          tone(1046.5, 0.2, 'square', 0.07, 0.27);
+        },
+        error() {
+          tone(220, 0.15, 'sawtooth', 0.06, 0);
+          tone(165, 0.22, 'sawtooth', 0.06, 0.14);
+        },
+        coffee() {
+          tone(440, 0.07, 'triangle', 0.07, 0);
+          tone(554.37, 0.07, 'triangle', 0.07, 0.07);
+          tone(659.25, 0.14, 'triangle', 0.07, 0.14);
         }
+      };
+    })();
 
-        function queueNextPR() {
-            // Pick a PR not recently used
-            let available = PR_DATABASE.filter(pr => !state.usedPRIds.includes(pr.id));
-            if (available.length === 0) {
-                state.usedPRIds = [];
-                available = [...PR_DATABASE];
-            }
-            const chosen = available[Math.floor(Math.random() * available.length)];
-            state.usedPRIds.push(chosen.id);
-            state.currentPR = chosen;
-            state.hasPendingPR = true;
-            state.prResolved = false;
-            state.prCounter++;
-            sfx.newPrPing();
-            showToast('🔔', `New PR #${state.prCounter} from ${chosen.author}!`);
+    // --- Pull Request Dataset (10 Senior Dev Bug Scenarios + Hints) ---
+    const PR_SCENARIOS = [
+      {
+        id: 'PR #101',
+        author: 'Marcus (Principal Backend)',
+        title: 'Quick discount calculation for checkout',
+        language: 'JAVASCRIPT',
+        hint: 'Check what happens to the total price when discountPercent is 20 (0.20 vs 20).',
+        lines: [
+          'function calculateCheckoutTotal(subtotal, discountPercent) {',
+          '  if (subtotal <= 0) return 0;',
+          '  const discountAmount = subtotal * discountPercent;',
+          '  return Number((subtotal - discountAmount).toFixed(2));',
+          '}'
+        ],
+        bugLine: 2,
+        explanation: 'Multiplying subtotal directly by 20 instead of (discountPercent / 100) subtracts 20x the subtotal and produces a negative total!'
+      },
+      {
+        id: 'PR #102',
+        author: 'Elena (Staff Platform)',
+        title: 'Batch user cleanup helper',
+        language: 'PYTHON',
+        hint: 'Look closely at mutating a list while iterating forward over it with a for-loop.',
+        lines: [
+          'def remove_inactive_users(users):',
+          '    for user in users:',
+          '        if not user.get("active", False):',
+          '            users.remove(user)',
+          '    return users'
+        ],
+        bugLine: 3,
+        explanation: 'Removing items from a list while iterating over it shifts indices forward and skips the element right after a removed user.'
+      },
+      {
+        id: 'PR #103',
+        author: 'Devon (Senior DevOps)',
+        title: 'Fallback API client config for staging',
+        language: 'JAVASCRIPT',
+        hint: 'Check if any hardcoded credential or test token was left in the fallback config.',
+        lines: [
+          'export function getApiClientConfig(env) {',
+          '  const baseUrl = env === "prod" ? "https://api.example.com" : "https://staging.example.com";',
+          '  const apiKey = process.env.SERVICE_API_KEY || "FAKE_TEST_TOKEN_DO_NOT_COMMIT_123";',
+          '  return { baseUrl, apiKey, timeoutMs: 5000 };',
+          '}'
+        ],
+        bugLine: 2,
+        explanation: 'Hardcoding a token fallback in source code risks leaking credentials or silently authenticating with a dummy key in real environments.'
+      },
+      {
+        id: 'PR #104',
+        author: 'Priya (Lead Frontend)',
+        title: 'Live search counter effect in React',
+        language: 'REACT',
+        hint: 'Look at the dependency array inside useEffect—updating searchCount triggers the effect again.',
+        lines: [
+          'useEffect(() => {',
+          '  if (!query.trim()) return;',
+          '  setSearchCount(searchCount + 1);',
+          '}, [query, searchCount]);'
+        ],
+        bugLine: 2,
+        explanation: 'Including searchCount in the dependency array while calling setSearchCount inside the effect creates an infinite re-render loop!'
+      },
+      {
+        id: 'PR #105',
+        author: 'Liam (Senior DBA)',
+        title: 'Archive old support tickets script',
+        language: 'SQL',
+        hint: 'Look at the DELETE statement—is there a WHERE clause restricting which rows are deleted?',
+        lines: [
+          'BEGIN TRANSACTION;',
+          'SELECT COUNT(*) FROM support_tickets WHERE status = \'CLOSED\';',
+          'DELETE FROM support_tickets;',
+          'COMMIT;'
+        ],
+        bugLine: 2,
+        explanation: 'A DELETE statement without a WHERE clause wipes out every single row in support_tickets, not just closed ones.'
+      },
+      {
+        id: 'PR #106',
+        author: 'Marcus (Principal Backend)',
+        title: 'Async retry backoff loop',
+        language: 'JAVASCRIPT',
+        hint: 'Check whether await is missing on the sleep/delay promise inside the loop.',
+        lines: [
+          'async function fetchWithRetry(url, retries = 3) {',
+          '  for (let attempt = 1; attempt <= retries; attempt++) {',
+          '    try { return await fetch(url); }',
+          '    catch (err) { delay(200 * attempt); }',
+          '  }',
+          '}'
+        ],
+        bugLine: 3,
+        explanation: 'Calling delay(...) without await fires all retries immediately without waiting for the backoff pause.'
+      },
+      {
+        id: 'PR #107',
+        author: 'Elena (Staff Platform)',
+        title: 'Safe dictionary lookup for feature flags',
+        language: 'PYTHON',
+        hint: 'Direct bracket indexing flags[flag_name] raises a KeyError if the key is missing.',
+        lines: [
+          'def is_feature_enabled(flags, flag_name):',
+          '    if not isinstance(flags, dict):',
+          '        return False',
+          '    return bool(flags[flag_name])'
+        ],
+        bugLine: 3,
+        explanation: 'Using flags[flag_name] instead of flags.get(flag_name, False) throws a KeyError whenever a new flag is not yet present.'
+      },
+      {
+        id: 'PR #108',
+        author: 'Priya (Lead Frontend)',
+        title: 'Modal overlay click-through fix',
+        language: 'CSS',
+        hint: 'Look at pointer-events on the full-screen backdrop—none blocks clicks underneath.',
+        lines: [
+          '.modal-backdrop {',
+          '  position: fixed;',
+          '  inset: 0;',
+          '  pointer-events: none;',
+          '  background: rgba(0, 0, 0, 0.7);',
+          '}'
+        ],
+        bugLine: 3,
+        explanation: 'Setting pointer-events: none on a full-screen backdrop lets users click buttons and links behind the modal instead of interacting with it.'
+      },
+      {
+        id: 'PR #109',
+        author: 'Devon (Senior DevOps)',
+        title: 'Parse pagination page number safely',
+        language: 'JAVASCRIPT',
+        hint: 'parseInt without a radix or fallback can return NaN when pageParam is undefined or invalid.',
+        lines: [
+          'function getPageNumber(query) {',
+          '  const raw = query.page;',
+          '  const page = parseInt(raw);',
+          '  return Math.max(1, page);',
+          '}'
+        ],
+        bugLine: 2,
+        explanation: 'When query.page is missing or non-numeric, parseInt(undefined) returns NaN, and Math.max(1, NaN) stays NaN.'
+      },
+      {
+        id: 'PR #110',
+        author: 'Liam (Senior DBA)',
+        title: 'Calculate average order value per customer',
+        language: 'SQL',
+        hint: 'Selecting customer_id alongside AVG(total) requires a GROUP BY clause.',
+        lines: [
+          'SELECT customer_id, AVG(total) AS avg_order',
+          'FROM orders',
+          'WHERE status = \'PAID\'',
+          'ORDER BY avg_order DESC;'
+        ],
+        bugLine: 0,
+        explanation: 'Mixing an aggregate function like AVG(total) with a non-aggregated column (customer_id) without GROUP BY causes a SQL query error.'
+      }
+    ];
+
+    // --- Game State ---
+    const canvas = document.getElementById('office-canvas');
+    const ctx = canvas.getContext('2d');
+
+    const state = {
+      started: false,
+      score: 0,
+      caughtCount: 0,
+      streak: 0,
+      prIndex: 0,
+      activePR: null,
+      prSolved: false,
+      boostTimer: 0,
+      player: {
+        x: 480,
+        y: 340,
+        size: 28,
+        speed: 195,
+        facing: 'down'
+      },
+      keys: {},
+      touchDir: null,
+      toastTimeout: null
+    };
+
+    // World landmarks
+    const deskZone = { x: 430, y: 215, w: 100, h: 64, label: 'YOUR WORKSTATION' };
+    const coffeeZone = { x: 745, y: 145, w: 72, h: 64, label: 'ESPRESSO MACHINE' };
+
+    const obstacles = [
+      { x: 120, y: 140, w: 120, h: 52 },
+      { x: 120, y: 250, w: 120, h: 52 },
+      { x: 730, y: 360, w: 120, h: 52 }
+    ];
+
+    // --- UI Elements ---
+    const hudRole = document.getElementById('hud-role');
+    const hudScore = document.getElementById('hud-score');
+    const hudCaught = document.getElementById('hud-caught');
+    const hudStreak = document.getElementById('hud-streak');
+    const boostPill = document.getElementById('boost-pill');
+    const hudBoost = document.getElementById('hud-boost');
+    const muteBtn = document.getElementById('mute-btn');
+    const toastBanner = document.getElementById('toast-banner');
+    const interactPrompt = document.getElementById('interact-prompt');
+    const startScreen = document.getElementById('start-screen');
+    const startBtn = document.getElementById('start-btn');
+
+    const prModal = document.getElementById('pr-modal');
+    const prTitle = document.getElementById('pr-modal-title');
+    const prMeta = document.getElementById('pr-modal-meta');
+    const prLangBadge = document.getElementById('pr-lang-badge');
+    const hintBtn = document.getElementById('hint-btn');
+    const hintBanner = document.getElementById('hint-banner');
+    const codeLinesEl = document.getElementById('code-lines');
+    const reviewFeedback = document.getElementById('review-feedback');
+    const closePrBtn = document.getElementById('close-pr-btn');
+    const nextPrBtn = document.getElementById('next-pr-btn');
+
+    function getRoleTitle(caught) {
+      if (caught >= 9) return 'STAFF ENG';
+      if (caught >= 6) return 'SENIOR DEV';
+      if (caught >= 3) return 'MID DEV';
+      return 'INTERN';
+    }
+
+    function showToast(message, borderColor = '#d29922') {
+      toastBanner.textContent = message;
+      toastBanner.style.borderColor = borderColor;
+      toastBanner.classList.add('show');
+      clearTimeout(state.toastTimeout);
+      state.toastTimeout = setTimeout(() => {
+        toastBanner.classList.remove('show');
+      }, 2800);
+    }
+
+    function updateHUD() {
+      hudRole.textContent = getRoleTitle(state.caughtCount);
+      hudScore.textContent = state.score;
+      hudCaught.textContent = `${state.caughtCount} / ${PR_SCENARIOS.length}`;
+      hudStreak.textContent = `${state.streak}x`;
+
+      if (state.boostTimer > 0) {
+        boostPill.style.display = 'flex';
+        hudBoost.textContent = `${state.boostTimer.toFixed(1)}s`;
+      } else {
+        boostPill.style.display = 'none';
+      }
+    }
+
+    function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
+      return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+    }
+
+    function nearZone(zone, pad = 26) {
+      const px = state.player.x - state.player.size / 2;
+      const py = state.player.y - state.player.size / 2;
+      return rectsOverlap(
+        px - pad,
+        py - pad,
+        state.player.size + pad * 2,
+        state.player.size + pad * 2,
+        zone.x,
+        zone.y,
+        zone.w,
+        zone.h
+      );
+    }
+
+    function openCurrentPR() {
+      if (prModal.classList.contains('active')) return;
+
+      if (state.prIndex >= PR_SCENARIOS.length) {
+        showToast('ALL 10 SENIOR DEV BUGS CAUGHT! GREAT WORK!', '#3fb950');
+        return;
+      }
+
+      const pr = PR_SCENARIOS[state.prIndex];
+      state.activePR = pr;
+      state.prSolved = false;
+
+      prTitle.textContent = `${pr.id}: ${pr.title}`;
+      prMeta.textContent = `Author: ${pr.author}`;
+      prLangBadge.textContent = pr.language;
+
+      // Reset Hint UI for this PR
+      hintBanner.textContent = `Hint: ${pr.hint}`;
+      hintBanner.classList.remove('visible');
+      hintBtn.style.display = 'inline-block';
+      hintBtn.textContent = 'SHOW HINT';
+
+      reviewFeedback.className = '';
+      reviewFeedback.textContent = '';
+      nextPrBtn.style.display = 'none';
+
+      codeLinesEl.innerHTML = '';
+      pr.lines.forEach((lineText, idx) => {
+        const row = document.createElement('div');
+        row.className = 'code-line';
+        row.dataset.line = idx;
+
+        const numSpan = document.createElement('span');
+        numSpan.className = 'line-num';
+        numSpan.textContent = idx + 1;
+
+        const codeSpan = document.createElement('span');
+        codeSpan.className = 'line-code';
+        codeSpan.textContent = lineText;
+
+        row.appendChild(numSpan);
+        row.appendChild(codeSpan);
+
+        row.addEventListener('click', () => handleLineClick(idx, row));
+        codeLinesEl.appendChild(row);
+      });
+
+      prModal.classList.add('active');
+      AudioEngine.ping();
+    }
+
+    function handleLineClick(lineIndex, rowEl) {
+      if (state.prSolved || !state.activePR) return;
+
+      const pr = state.activePR;
+      if (lineIndex === pr.bugLine) {
+        state.prSolved = true;
+        state.caughtCount += 1;
+        state.streak += 1;
+        const pointsEarned = 100 + (state.streak - 1) * 25;
+        state.score += pointsEarned;
+        state.prIndex += 1;
+
+        rowEl.classList.add('correct');
+        reviewFeedback.className = 'success';
+        reviewFeedback.textContent = `Bug caught! (+${pointsEarned} pts) ${pr.explanation}`;
+
+        AudioEngine.success();
+        updateHUD();
+
+        if (state.prIndex < PR_SCENARIOS.length) {
+          nextPrBtn.style.display = 'inline-block';
+          nextPrBtn.textContent = 'NEXT PR';
+        } else {
+          nextPrBtn.style.display = 'none';
+          showToast('SHIFT COMPLETE! ALL 10 BUGS CAUGHT!', '#3fb950');
         }
+      } else {
+        state.streak = 0;
+        state.score = Math.max(0, state.score - 25);
+        rowEl.classList.add('wrong');
+        reviewFeedback.className = 'error';
+        reviewFeedback.textContent = 'Not that line (-25 pts, streak reset). Try clicking another line or use Show Hint!';
+        AudioEngine.error();
+        updateHUD();
+      }
+    }
 
-        /**
-         * ============================================================================
-         * CODE REVIEW MODAL LOGIC
-         * ============================================================================
-         */
-        function openCodeReviewModal() {
-            if (!state.hasPendingPR || !state.currentPR) {
-                showToast('☕', 'Inbox zero! Grab a coffee while waiting for PRs.');
-                return;
-            }
+    function triggerCoffeeBoost() {
+      state.boostTimer = 15.0;
+      AudioEngine.coffee();
+      showToast('ESPRESSO BOOST! +45% SPEED FOR 15 SECONDS', '#d29922');
+      updateHUD();
+    }
 
-            sfx.openDesk();
-            state.screen = 'REVIEWING';
-            // Clear movement keys so player doesn't keep walking when closing
-            keys.up = keys.down = keys.left = keys.right = false;
+    function interactWithNearby() {
+      if (!state.started || prModal.classList.contains('active')) return;
+      if (nearZone(deskZone)) {
+        openCurrentPR();
+      } else if (nearZone(coffeeZone)) {
+        triggerCoffeeBoost();
+      }
+    }
 
-            const pr = state.currentPR;
-            document.getElementById('prNumberBadge').textContent = `PR #${state.prCounter}`;
-            document.getElementById('prLangBadge').textContent = pr.lang;
-            document.getElementById('prTitle').textContent = pr.title;
-            document.getElementById('prAuthor').textContent = pr.author;
-            document.getElementById('prDescription').textContent = `"${pr.desc}"`;
-            document.getElementById('prFileName').textContent = `📄 ${pr.file}`;
+    // --- Event Listeners ---
+    startBtn.addEventListener('click', () => {
+      startScreen.style.display = 'none';
+      state.started = true;
+      updateHUD();
+      showToast('WALK TO YOUR GLOWING DESK TO INSPECT PRS!', '#58a6ff');
+    });
 
-            const feedbackBox = document.getElementById('reviewFeedbackBox');
-            feedbackBox.classList.add('hidden');
+    muteBtn.addEventListener('click', () => {
+      const isMuted = AudioEngine.toggleMute();
+      muteBtn.textContent = isMuted ? 'SFX: OFF' : 'SFX: ON';
+    });
 
-            const container = document.getElementById('codeLinesContainer');
-            container.innerHTML = '';
+    hintBtn.addEventListener('click', () => {
+      hintBanner.classList.add('visible');
+      hintBtn.style.display = 'none';
+      AudioEngine.hint();
+    });
 
-            pr.lines.forEach((lineText, idx) => {
-                const row = document.createElement('div');
-                row.className = 'code-line flex items-start px-2 py-1.5 rounded select-none';
-                row.dataset.lineIndex = idx;
+    closePrBtn.addEventListener('click', () => {
+      prModal.classList.remove('active');
+    });
 
-                const lineNum = document.createElement('span');
-                lineNum.className = 'w-8 shrink-0 text-right pr-3 text-[#484f58] select-none';
-                lineNum.textContent = idx + 1;
+    nextPrBtn.addEventListener('click', () => {
+      prModal.classList.remove('active');
+      if (state.prIndex < PR_SCENARIOS.length) {
+        openCurrentPR();
+      }
+    });
 
-                const codeContent = document.createElement('pre');
-                codeContent.className = 'm-0 whitespace-pre-wrap break-all text-[#e6edf3] flex-1';
-                codeContent.textContent = lineText || ' ';
+    canvas.addEventListener('click', (e) => {
+      if (!state.started || prModal.classList.contains('active')) return;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const cx = (e.clientX - rect.left) * scaleX;
+      const cy = (e.clientY - rect.top) * scaleY;
 
-                row.appendChild(lineNum);
-                row.appendChild(codeContent);
-
-                row.addEventListener('click', () => handleLineClick(idx, row));
-                container.appendChild(row);
-            });
-
-            codeModal.classList.remove('hidden');
+      if (cx >= deskZone.x && cx <= deskZone.x + deskZone.w && cy >= deskZone.y && cy <= deskZone.y + deskZone.h) {
+        if (nearZone(deskZone, 45)) {
+          openCurrentPR();
+        } else {
+          showToast('WALK CLOSER TO YOUR WORKSTATION FIRST!', '#58a6ff');
         }
-
-        function handleLineClick(lineIndex, rowElement) {
-            if (state.prResolved) return;
-            state.prResolved = true;
-            state.totalAttempts++;
-
-            const pr = state.currentPR;
-            const allRows = document.querySelectorAll('.code-line');
-            allRows.forEach(r => r.classList.add('locked'));
-
-            const feedbackBox = document.getElementById('reviewFeedbackBox');
-            const feedbackIcon = document.getElementById('feedbackIcon');
-            const feedbackTitle = document.getElementById('feedbackTitle');
-            const feedbackExplanation = document.getElementById('feedbackExplanation');
-            const nextPrBtn = document.getElementById('nextPrBtn');
-
-            feedbackBox.classList.remove('hidden');
-
-            if (lineIndex === pr.bugLine) {
-                // CAUGHT THE BUG!
-                sfx.bugCaught();
-                rowElement.classList.add('correct-bug');
-                state.bugsCaught++;
-                state.streak++;
-                const multiplier = Math.min(3, 1 + Math.floor((state.streak - 1) / 2) * 0.5);
-                const pointsEarned = Math.round(150 * multiplier);
-                state.score += pointsEarned;
-                state.timeLeft = Math.min(120, state.timeLeft + 6); // +6s bonus time
-
-                feedbackIcon.textContent = '🐛';
-                feedbackTitle.className = 'font-pixel text-xs sm:text-sm text-[#3fb950] mb-1.5';
-                feedbackTitle.textContent = `BUG CAUGHT! +${pointsEarned} PTS (+6s)`;
-                feedbackExplanation.textContent = pr.explanation;
-                nextPrBtn.textContent = 'BACK TO DESK ➔';
-            } else {
-                // FALSE ALARM!
-                sfx.falseAlarm();
-                rowElement.classList.add('wrong-line');
-                // Highlight the actual bug so player learns!
-                if (allRows[pr.bugLine]) {
-                    allRows[pr.bugLine].classList.add('correct-bug');
-                }
-                state.streak = 0;
-                state.credibility--;
-
-                feedbackIcon.textContent = '🚨';
-                feedbackTitle.className = 'font-pixel text-xs sm:text-sm text-[#f85149] mb-1.5';
-                feedbackTitle.textContent = `FALSE ALARM! -1 CREDIBILITY`;
-                feedbackExplanation.textContent = `Line ${lineIndex + 1} was fine! The real bug was on Line ${pr.bugLine + 1}: ${pr.explanation}`;
-                nextPrBtn.textContent = state.credibility <= 0 ? 'VIEW RESULTS' : 'CONTINUE ➔';
-            }
-
-            state.hasPendingPR = false;
-            updateHUD();
+      } else if (cx >= coffeeZone.x && cx <= coffeeZone.x + coffeeZone.w && cy >= coffeeZone.y && cy <= coffeeZone.y + coffeeZone.h) {
+        if (nearZone(coffeeZone, 45)) {
+          triggerCoffeeBoost();
+        } else {
+          showToast('WALK CLOSER TO THE ESPRESSO MACHINE!', '#d29922');
         }
+      }
+    });
 
-        function closeCodeReviewModal() {
-            codeModal.classList.add('hidden');
-            if (state.credibility <= 0) {
-                endShift('FIRED');
-                return;
-            }
-            state.screen = 'PLAYING';
-            if (!state.hasPendingPR) {
-                // Spawn next PR immediately so gameplay stays fast and engaging
-                queueNextPR();
-            }
+    window.addEventListener('keydown', (e) => {
+      const k = e.key.toLowerCase();
+      state.keys[k] = true;
+
+      if ((k === ' ' || k === 'enter') && state.started && !prModal.classList.contains('active')) {
+        if (nearZone(deskZone) || nearZone(coffeeZone)) {
+          e.preventDefault();
+          interactWithNearby();
         }
+      }
+    });
 
-        /**
-         * ============================================================================
-         * INTERACTION DETECTION IN OFFICE
-         * ============================================================================
-         */
-        function getNearbyInteractable() {
-            for (const item of FURNITURE) {
-                if (item.type !== 'player_desk' && item.type !== 'coffee') continue;
-                const cx = item.x + item.w / 2;
-                const cy = item.y + item.h / 2;
-                const dist = Math.hypot(player.x - cx, player.y - cy);
-                if (dist < 1.65) {
-                    return item;
-                }
-            }
-            return null;
+    window.addEventListener('keyup', (e) => {
+      state.keys[e.key.toLowerCase()] = false;
+    });
+
+    document.querySelectorAll('.dpad-btn').forEach((btn) => {
+      const dir = btn.dataset.dir;
+      btn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        state.touchDir = dir;
+      });
+      btn.addEventListener('pointerup', () => {
+        if (state.touchDir === dir) state.touchDir = null;
+      });
+      btn.addEventListener('pointerleave', () => {
+        if (state.touchDir === dir) state.touchDir = null;
+      });
+    });
+
+    // --- Update & Render Loop ---
+    let lastTime = performance.now();
+
+    function update(dt) {
+      if (!state.started || prModal.classList.contains('active')) {
+        interactPrompt.style.display = 'none';
+        return;
+      }
+
+      if (state.boostTimer > 0) {
+        state.boostTimer = Math.max(0, state.boostTimer - dt);
+        updateHUD();
+      }
+
+      let dx = 0;
+      let dy = 0;
+      if (state.keys['w'] || state.keys['arrowup'] || state.touchDir === 'up') dy -= 1;
+      if (state.keys['s'] || state.keys['arrowdown'] || state.touchDir === 'down') dy += 1;
+      if (state.keys['a'] || state.keys['arrowleft'] || state.touchDir === 'left') dx -= 1;
+      if (state.keys['d'] || state.keys['arrowright'] || state.touchDir === 'right') dx += 1;
+
+      if (dx !== 0 && dy !== 0) {
+        const inv = 1 / Math.SQRT2;
+        dx *= inv;
+        dy *= inv;
+      }
+
+      if (Math.abs(dx) > Math.abs(dy)) {
+        state.player.facing = dx < 0 ? 'left' : 'right';
+      } else if (dy !== 0) {
+        state.player.facing = dy < 0 ? 'up' : 'down';
+      }
+
+      const currentSpeed = state.boostTimer > 0 ? state.player.speed * 1.45 : state.player.speed;
+      const half = state.player.size / 2;
+
+      const nextX = Math.max(48 + half, Math.min(canvas.width - 48 - half, state.player.x + dx * currentSpeed * dt));
+      if (!obstacles.some((ob) => rectsOverlap(nextX - half, state.player.y - half, state.player.size, state.player.size, ob.x, ob.y, ob.w, ob.h))) {
+        state.player.x = nextX;
+      }
+
+      const nextY = Math.max(95 + half, Math.min(canvas.height - 40 - half, state.player.y + dy * currentSpeed * dt));
+      if (!obstacles.some((ob) => rectsOverlap(state.player.x - half, nextY - half, state.player.size, state.player.size, ob.x, ob.y, ob.w, ob.h))) {
+        state.player.y = nextY;
+      }
+
+      // Context prompt
+      if (nearZone(deskZone)) {
+        interactPrompt.style.display = 'block';
+        interactPrompt.style.borderColor = '#58a6ff';
+        interactPrompt.textContent = state.prIndex < PR_SCENARIOS.length
+          ? `PRESS SPACE / ENTER OR CLICK DESK TO REVIEW ${PR_SCENARIOS[state.prIndex].id}`
+          : 'ALL 10 BUGS CAUGHT! SHIFT COMPLETE';
+      } else if (nearZone(coffeeZone)) {
+        interactPrompt.style.display = 'block';
+        interactPrompt.style.borderColor = '#d29922';
+        interactPrompt.textContent = 'PRESS SPACE / ENTER OR CLICK FOR ESPRESSO BOOST';
+      } else {
+        interactPrompt.style.display = 'none';
+      }
+    }
+
+    function drawOffice() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Floor tiles
+      ctx.fillStyle = '#141923';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const tileSize = 40;
+      for (let y = 80; y < canvas.height; y += tileSize) {
+        for (let x = 0; x < canvas.width; x += tileSize) {
+          if (((x / tileSize) + (y / tileSize)) % 2 === 0) {
+            ctx.fillStyle = '#181e2a';
+            ctx.fillRect(x, y, tileSize, tileSize);
+          }
         }
-
-        function triggerInteraction() {
-            if (state.screen !== 'PLAYING') return;
-            const target = getNearbyInteractable();
-            if (!target) return;
-
-            if (target.type === 'player_desk') {
-                openCodeReviewModal();
-            } else if (target.type === 'coffee') {
-                sfx.coffeeSlurp();
-                state.caffeineTimer = 15;
-                state.score += 25;
-                updateHUD();
-                showToast('☕', 'Double Espresso! Movement speed boosted for 15s!');
-            }
-        }
-
-        /**
-         * ============================================================================
-         * PHYSICS & COLLISION
-         * ============================================================================
-         */
-        function checkCollision(nx, ny) {
-            // Outer walls (leave 1-tile top wall, 0.4 border on sides/bottom)
-            if (nx - player.radius < 0.45 || nx + player.radius > WORLD_COLS - 0.45) return true;
-            if (ny - player.radius < 1.35 || ny + player.radius > WORLD_ROWS - 0.45) return true;
-
-            // Furniture AABB vs Player Circle
-            for (const f of FURNITURE) {
-                const closestX = Math.max(f.x, Math.min(nx, f.x + f.w));
-                const closestY = Math.max(f.y, Math.min(ny, f.y + f.h));
-                const dx = nx - closestX;
-                const dy = ny - closestY;
-                if ((dx * dx + dy * dy) < (player.radius * player.radius)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        function update(dt) {
-            state.animTime += dt;
-
-            if (state.screen !== 'PLAYING') return;
-
-            // Update Sprint Timer
-            state.timeLeft -= dt;
-            if (state.timeLeft <= 0) {
-                state.timeLeft = 0;
-                updateHUD();
-                endShift('TIME_UP');
-                return;
-            }
-
-            // Update Caffeine Buff
-            if (state.caffeineTimer > 0) {
-                state.caffeineTimer = Math.max(0, state.caffeineTimer - dt);
-            }
-
-            updateHUD();
-
-            // Movement Vector
-            let vx = 0;
-            let vy = 0;
-            if (keys.up) vy -= 1;
-            if (keys.down) vy += 1;
-            if (keys.left) vx -= 1;
-            if (keys.right) vx += 1;
-
-            if (vx !== 0 || vy !== 0) {
-                const len = Math.hypot(vx, vy);
-                vx /= len;
-                vy /= len;
-
-                // Facing direction
-                if (Math.abs(vx) > Math.abs(vy)) {
-                    player.dir = vx > 0 ? 'right' : 'left';
-                } else {
-                    player.dir = vy > 0 ? 'down' : 'up';
-                }
-
-                const speedMult = state.caffeineTimer > 0 ? 1.55 : 1.0;
-                const moveStep = player.baseSpeed * speedMult * dt;
-
-                // Separate X and Y axis sliding collision
-                if (!checkCollision(player.x + vx * moveStep, player.y)) {
-                    player.x += vx * moveStep;
-                }
-                if (!checkCollision(player.x, player.y + vy * moveStep)) {
-                    player.y += vy * moveStep;
-                }
-
-                player.moving = true;
-                player.walkFrame += dt * 10 * speedMult;
-
-                if (state.animTime - state.lastStepSound > (state.caffeineTimer > 0 ? 0.22 : 0.32)) {
-                    sfx.step();
-                    state.lastStepSound = state.animTime;
-                }
-            } else {
-                player.moving = false;
-                player.walkFrame = 0;
-            }
-
-            // Update Context Interaction Prompt
-            const nearby = getNearbyInteractable();
-            if (nearby) {
-                interactPrompt.classList.remove('hidden');
-                if (nearby.type === 'player_desk') {
-                    interactPromptText.textContent = state.hasPendingPR
-                        ? `Inspect PR #${state.prCounter}`
-                        : 'Check Computer';
-                } else if (nearby.type === 'coffee') {
-                    interactPromptText.textContent = 'Drink Espresso (Speed Boost)';
-                }
-            } else {
-                interactPrompt.classList.add('hidden');
-            }
-        }
-
-        /**
-         * ============================================================================
-         * 2D PIXEL-ART RENDERING ENGINE
-         * ============================================================================
-         */
-        function resizeCanvas() {
-            const parent = canvas.parentElement;
-            canvas.width = parent.clientWidth;
-            canvas.height = parent.clientHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-
-        function drawPixelRect(x, y, w, h, color) {
-            ctx.fillStyle = color;
-            ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
-        }
-
-        function drawDevCharacter(cx, cy, tileSize, options) {
-            const { shirt, hair, dir, walkFrame, isPlayer, caffeinated } = options;
-            const s = tileSize * 0.72;
-            const bob = Math.abs(Math.sin(walkFrame)) * (tileSize * 0.08);
-            const x = cx - s / 2;
-            const y = cy - s * 0.65 - bob;
-
-            // Shadow
-            ctx.fillStyle = 'rgba(0,0,0,0.35)';
-            ctx.beginPath();
-            ctx.ellipse(cx, cy + tileSize * 0.16, s * 0.36, s * 0.16, 0, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Caffeine aura
-            if (caffeinated) {
-                ctx.strokeStyle = 'rgba(251, 191, 36, 0.7)';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(cx, cy - s * 0.15, s * 0.52 + Math.sin(state.animTime * 12) * 3, 0, Math.PI * 2);
-                ctx.stroke();
-            }
-
-            // Legs
-            const legOffset = Math.sin(walkFrame) * (s * 0.12);
-            drawPixelRect(x + s * 0.26, y + s * 0.68 + legOffset, s * 0.18, s * 0.26, '#1f2937');
-            drawPixelRect(x + s * 0.56, y + s * 0.68 - legOffset, s * 0.18, s * 0.26, '#1f2937');
-
-            // Torso / Hoodie
-            drawPixelRect(x + s * 0.2, y + s * 0.38, s * 0.6, s * 0.36, shirt);
-            // Hoodie pocket / detail
-            drawPixelRect(x + s * 0.32, y + s * 0.52, s * 0.36, s * 0.16, 'rgba(0,0,0,0.2)');
-
-            // Head
-            drawPixelRect(x + s * 0.22, y + s * 0.05, s * 0.56, s * 0.36, '#f3c69f');
-
-            // Hair
-            drawPixelRect(x + s * 0.2, y + s * 0.02, s * 0.6, s * 0.14, hair);
-            if (dir !== 'up') {
-                // Eyes
-                const eyeShift = dir === 'left' ? -s * 0.06 : dir === 'right' ? s * 0.06 : 0;
-                drawPixelRect(x + s * 0.33 + eyeShift, y + s * 0.22, s * 0.08, s * 0.08, '#0d1117');
-                drawPixelRect(x + s * 0.57 + eyeShift, y + s * 0.22, s * 0.08, s * 0.08, '#0d1117');
-            }
-
-            // Player "YOU" Tag
-            if (isPlayer) {
-                ctx.font = `bold ${Math.max(9, Math.round(tileSize * 0.2))}px "Press Start 2P", monospace`;
-                ctx.textAlign = 'center';
-                ctx.fillStyle = '#3fb950';
-                ctx.fillText('YOU', cx, y - 6);
-            }
-        }
-
-        function renderOffice() {
-            const cw = canvas.width;
-            const ch = canvas.height;
-
-            ctx.fillStyle = '#090c10';
-            ctx.fillRect(0, 0, cw, ch);
-
-            // Calculate scale so the 16x11 office fits nicely on any screen
-            const tileSize = Math.floor(Math.min(cw / WORLD_COLS, ch / WORLD_ROWS));
-            const officeW = tileSize * WORLD_COLS;
-            const officeH = tileSize * WORLD_ROWS;
-            const offsetX = Math.floor((cw - officeW) / 2);
-            const offsetY = Math.floor((ch - officeH) / 2);
-
-            ctx.save();
-            ctx.translate(offsetX, offsetY);
-
-            // 1. Floor Tiles (Checkerboard dark slate & subtle wood breakroom)
-            for (let r = 0; r < WORLD_ROWS; r++) {
-                for (let c = 0; c < WORLD_COLS; c++) {
-                    const isBreakroom = c < 3 && r < 4;
-                    if (isBreakroom) {
-                        ctx.fillStyle = (r + c) % 2 === 0 ? '#2b2118' : '#241b13';
-                    } else {
-                        ctx.fillStyle = (r + c) % 2 === 0 ? '#161b22' : '#131820';
-                    }
-                    ctx.fillRect(c * tileSize, r * tileSize, tileSize, tileSize);
-
-                    // Subtle grid seam
-                    ctx.strokeStyle = 'rgba(255,255,255,0.025)';
-                    ctx.strokeRect(c * tileSize, r * tileSize, tileSize, tileSize);
-                }
-            }
-
-            // 2. Top Wall & Outer Walls
-            drawPixelRect(0, 0, officeW, tileSize * 1.15, '#21262d');
-            drawPixelRect(0, tileSize * 1.15, officeW, tileSize * 0.15, '#30363d');
-
-            // Outer border walls
-            ctx.strokeStyle = '#30363d';
-            ctx.lineWidth = Math.max(4, tileSize * 0.12);
-            ctx.strokeRect(0, 0, officeW, officeH);
-
-            // Carpet rug under player workstation zone
-            drawPixelRect(tileSize * 2.6, tileSize * 6.6, tileSize * 3.6, tileSize * 2.5, 'rgba(31, 111, 235, 0.08)');
-            ctx.strokeStyle = 'rgba(88, 166, 255, 0.25)';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(tileSize * 2.6, tileSize * 6.6, tileSize * 3.6, tileSize * 2.5);
-
-            // 3. Draw Furniture
-            for (const f of FURNITURE) {
-                const fx = f.x * tileSize;
-                const fy = f.y * tileSize;
-                const fw = f.w * tileSize;
-                const fh = f.h * tileSize;
-
-                if (f.type === 'whiteboard') {
-                    drawPixelRect(fx, fy, fw, fh, '#e6edf3');
-                    ctx.strokeStyle = '#8b949e';
-                    ctx.lineWidth = 3;
-                    ctx.strokeRect(fx, fy, fw, fh);
-                    // Scribbles on whiteboard
-                    drawPixelRect(fx + fw * 0.1, fy + fh * 0.25, fw * 0.35, 3, '#1f6feb');
-                    drawPixelRect(fx + fw * 0.1, fy + fh * 0.5, fw * 0.5, 3, '#da3633');
-                    drawPixelRect(fx + fw * 0.65, fy + fh * 0.3, fw * 0.22, fh * 0.4, '#2ea043');
-                }
-                else if (f.type === 'server') {
-                    drawPixelRect(fx, fy, fw, fh, '#0d1117');
-                    ctx.strokeStyle = '#484f58';
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(fx, fy, fw, fh);
-                    // Blinking server LEDs
-                    for (let i = 0; i < 4; i++) {
-                        const ledOn = Math.sin(state.animTime * 6 + i * 2) > 0;
-                        drawPixelRect(fx + fw * 0.2, fy + fh * (0.2 + i * 0.18), fw * 0.6, 3, '#21262d');
-                        drawPixelRect(fx + fw * 0.25, fy + fh * (0.2 + i * 0.18), 4, 3, ledOn ? '#3fb950' : '#f85149');
-                    }
-                }
-                else if (f.type === 'coffee') {
-                    // Counter
-                    drawPixelRect(fx, fy, fw, fh, '#4a3525');
-                    drawPixelRect(fx, fy, fw, fh * 0.25, '#6e5038');
-                    // Espresso machine
-                    drawPixelRect(fx + fw * 0.2, fy - fh * 0.25, fw * 0.6, fh * 0.7, '#c9d1d9');
-                    drawPixelRect(fx + fw * 0.3, fy - fh * 0.1, fw * 0.4, fh * 0.25, '#1f242c');
-                    // Glowing brew indicator
-                    drawPixelRect(fx + fw * 0.65, fy - fh * 0.18, 5, 5, '#f0883e');
-
-                    // Steam particles
-                    const steamY = (state.animTime * 18) % 14;
-                    ctx.fillStyle = `rgba(255,255,255,${0.5 - steamY / 28})`;
-                    ctx.fillRect(fx + fw * 0.45, fy - fh * 0.35 - steamY, 3, 5);
-                }
-                else if (f.type === 'plant') {
-                    // Pot
-                    drawPixelRect(fx + fw * 0.25, fy + fh * 0.55, fw * 0.5, fh * 0.4, '#b35928');
-                    // Leaves
-                    drawPixelRect(fx + fw * 0.15, fy + fh * 0.15, fw * 0.7, fh * 0.45, '#238636');
-                    drawPixelRect(fx + fw * 0.28, fy + fh * 0.05, fw * 0.44, fh * 0.35, '#3fb950');
-                }
-                else if (f.type === 'coworker_desk' || f.type === 'player_desk') {
-                    const isPlayerDesk = f.type === 'player_desk';
-
-                    // Draw NPC sitting behind coworker desks
-                    if (!isPlayerDesk) {
-                        drawDevCharacter(fx + fw * 0.5, fy - tileSize * 0.05, tileSize, {
-                            shirt: f.shirt,
-                            hair: f.hair,
-                            dir: 'down',
-                            walkFrame: 0,
-                            isPlayer: false,
-                            caffeinated: false
-                        });
-                    }
-
-                    // Desk Surface
-                    drawPixelRect(fx, fy, fw, fh, isPlayerDesk ? '#2d3748' : '#374151');
-                    drawPixelRect(fx, fy, fw, fh * 0.18, isPlayerDesk ? '#4a5568' : '#4b5563');
-
-                    // Highlight border if player's desk has a pending PR
-                    if (isPlayerDesk && state.hasPendingPR) {
-                        const pulse = 0.55 + Math.sin(state.animTime * 6) * 0.45;
-                        ctx.strokeStyle = `rgba(63, 185, 80, ${pulse})`;
-                        ctx.lineWidth = 3;
-                        ctx.strokeRect(fx - 3, fy - 3, fw + 6, fh + 6);
-                    }
-
-                    // Dual Monitors
-                    const monW = fw * 0.34;
-                    const monH = fh * 0.42;
-                    // Left Monitor
-                    drawPixelRect(fx + fw * 0.12, fy + fh * 0.18, monW, monH, '#0d1117');
-                    drawPixelRect(fx + fw * 0.14, fy + fh * 0.21, monW - 4, monH - 5,
-                        isPlayerDesk && state.hasPendingPR ? '#1f6feb' : '#161b22');
-                    // Right Monitor
-                    drawPixelRect(fx + fw * 0.54, fy + fh * 0.18, monW, monH, '#0d1117');
-                    drawPixelRect(fx + fw * 0.56, fy + fh * 0.21, monW - 4, monH - 5,
-                        isPlayerDesk && state.hasPendingPR ? '#238636' : '#161b22');
-
-                    // Keyboard & Mouse
-                    drawPixelRect(fx + fw * 0.3, fy + fh * 0.72, fw * 0.32, fh * 0.16, '#9ca3af');
-                    drawPixelRect(fx + fw * 0.68, fy + fh * 0.74, fw * 0.08, fh * 0.14, '#9ca3af');
-
-                    // Floating Notification Bubble above Player's Desk
-                    if (isPlayerDesk && state.hasPendingPR) {
-                        const bobY = Math.sin(state.animTime * 5) * 5;
-                        const bx = fx + fw * 0.5;
-                        const by = fy - tileSize * 0.45 + bobY;
-
-                        // Badge background
-                        ctx.fillStyle = '#238636';
-                        ctx.beginPath();
-                        ctx.roundRect(bx - tileSize * 0.75, by - tileSize * 0.24, tileSize * 1.5, tileSize * 0.42, 6);
-                        ctx.fill();
-                        ctx.strokeStyle = '#3fb950';
-                        ctx.lineWidth = 2;
-                        ctx.stroke();
-
-                        ctx.font = `bold ${Math.max(8, Math.round(tileSize * 0.18))}px "Press Start 2P", monospace`;
-                        ctx.fillStyle = '#ffffff';
-                        ctx.textAlign = 'center';
-                        ctx.fillText('NEW PR!', bx, by + tileSize * 0.04);
-                    }
-                }
-            }
-
-            // 4. Draw Player Character
-            drawDevCharacter(player.x * tileSize, player.y * tileSize, tileSize, {
-                shirt: '#2ea043',
-                hair: '#3b2f2f',
-                dir: player.dir,
-                walkFrame: player.walkFrame,
-                isPlayer: true,
-                caffeinated: state.caffeineTimer > 0
-            });
-
-            ctx.restore();
-        }
-
-        /**
-         * ============================================================================
-         * MAIN GAME LOOP & LIFECYCLE
-         * ============================================================================
-         */
-        let lastTimestamp = 0;
-        function gameLoop(timestamp) {
-            if (!lastTimestamp) lastTimestamp = timestamp;
-            const dt = Math.min(0.05, (timestamp - lastTimestamp) / 1000);
-            lastTimestamp = timestamp;
-
-            update(dt);
-            renderOffice();
-
-            requestAnimationFrame(gameLoop);
-        }
-
-        function startNewGame() {
-            sfx.init();
-            state.screen = 'PLAYING';
-            state.score = 0;
-            state.credibility = 3;
-            state.timeLeft = 90;
-            state.bugsCaught = 0;
-            state.totalAttempts = 0;
-            state.streak = 0;
-            state.caffeineTimer = 0;
-            state.usedPRIds = [];
-            state.prCounter = 400;
-
-            player.x = 7.5;
-            player.y = 7.5;
-            player.dir = 'down';
-
-            startScreen.classList.add('hidden');
-            gameOverScreen.classList.add('hidden');
-            codeModal.classList.add('hidden');
-
-            queueNextPR();
-            updateHUD();
-        }
-
-        function endShift(reason) {
-            state.screen = 'GAMEOVER';
-            codeModal.classList.add('hidden');
-            interactPrompt.classList.add('hidden');
-            gameOverScreen.classList.remove('hidden');
-
-            const accuracy = state.totalAttempts > 0
-                ? Math.round((state.bugsCaught / state.totalAttempts) * 100)
-                : 100;
-
-            if (reason === 'FIRED') {
-                document.getElementById('gameOverEmoji').textContent = '💥';
-                document.getElementById('gameOverTitle').textContent = 'PROD WENT DOWN!';
-                document.getElementById('gameOverTitle').className = 'font-pixel text-base sm:text-xl text-[#f85149] mb-2';
-                document.getElementById('gameOverSubtitle').textContent =
-                    'Too many false alarms! Tech Lead revoked your merge approval privileges.';
-            } else {
-                sfx.promotion();
-                document.getElementById('gameOverEmoji').textContent = '🏆';
-                document.getElementById('gameOverTitle').textContent = 'SPRINT COMPLETE!';
-                document.getElementById('gameOverTitle').className = 'font-pixel text-base sm:text-xl text-[#3fb950] mb-2';
-                document.getElementById('gameOverSubtitle').textContent =
-                    'Shift over! You saved production from reckless Friday deployments.';
-            }
-
-            document.getElementById('finalScore').textContent = state.score;
-            document.getElementById('finalRank').textContent = hudRank.textContent;
-            document.getElementById('finalBugs').textContent = state.bugsCaught;
-            document.getElementById('finalAccuracy').textContent = `${accuracy}%`;
-        }
-
-        /**
-         * ============================================================================
-         * EVENT LISTENERS (KEYBOARD, TOUCH, BUTTONS)
-         * ============================================================================
-         */
-        window.addEventListener('keydown', (e) => {
-            const key = e.key.toLowerCase();
-
-            if (state.screen === 'PLAYING') {
-                if (key === 'w' || e.key === 'ArrowUp') keys.up = true;
-                if (key === 's' || e.key === 'ArrowDown') keys.down = true;
-                if (key === 'a' || e.key === 'ArrowLeft') keys.left = true;
-                if (key === 'd' || e.key === 'ArrowRight') keys.right = true;
-
-                if (key === 'e' || e.key === ' ') {
-                    e.preventDefault();
-                    triggerInteraction();
-                }
-            } else if (state.screen === 'REVIEWING') {
-                if (e.key === 'Escape') {
-                    closeCodeReviewModal();
-                } else if ((e.key === 'Enter' || e.key === ' ') && state.prResolved) {
-                    e.preventDefault();
-                    closeCodeReviewModal();
-                }
-            }
-        });
-
-        window.addEventListener('keyup', (e) => {
-            const key = e.key.toLowerCase();
-            if (key === 'w' || e.key === 'ArrowUp') keys.up = false;
-            if (key === 's' || e.key === 'ArrowDown') keys.down = false;
-            if (key === 'a' || e.key === 'ArrowLeft') keys.left = false;
-            if (key === 'd' || e.key === 'ArrowRight') keys.right = false;
-        });
-
-        // Mobile D-Pad Touch Events
-        document.querySelectorAll('.dpad-btn').forEach(btn => {
-            const dir = btn.dataset.dir;
-            const setDir = (val) => (e) => {
-                e.preventDefault();
-                keys[dir] = val;
-            };
-            btn.addEventListener('touchstart', setDir(true), { passive: false });
-            btn.addEventListener('touchend', setDir(false));
-            btn.addEventListener('mousedown', setDir(true));
-            btn.addEventListener('mouseup', setDir(false));
-            btn.addEventListener('mouseleave', setDir(false));
-        });
-
-        document.getElementById('mobileActionBtn').addEventListener('click', triggerInteraction);
-        interactPromptBtn.addEventListener('click', triggerInteraction);
-
-        document.getElementById('startGameBtn').addEventListener('click', startNewGame);
-        document.getElementById('restartBtn').addEventListener('click', startNewGame);
-        document.getElementById('closeModalBtn').addEventListener('click', closeCodeReviewModal);
-        document.getElementById('nextPrBtn').addEventListener('click', closeCodeReviewModal);
-
-        document.getElementById('muteBtn').addEventListener('click', () => {
-            const isMuted = sfx.toggleMute();
-            document.getElementById('muteBtn').textContent = isMuted ? '🔇' : '🔊';
-        });
-
-        // Boot up on window load
-        window.onload = function () {
-            resizeCanvas();
-            updateHUD();
-            requestAnimationFrame(gameLoop);
-        };
-    </script>
+      }
+
+      // Top office wall
+      ctx.fillStyle = '#0e1219';
+      ctx.fillRect(0, 0, canvas.width, 90);
+      ctx.fillStyle = '#262f40';
+      ctx.fillRect(0, 86, canvas.width, 4);
+
+      // Breakroom / Coffee area highlight
+      ctx.fillStyle = 'rgba(210, 153, 34, 0.08)';
+      ctx.fillRect(coffeeZone.x - 12, coffeeZone.y - 12, coffeeZone.w + 24, coffeeZone.h + 24);
+      ctx.strokeStyle = '#d29922';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(coffeeZone.x, coffeeZone.y, coffeeZone.w, coffeeZone.h);
+      ctx.fillStyle = '#e3b341';
+      ctx.font = '9px "Press Start 2P", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('ESPRESSO', coffeeZone.x + coffeeZone.w / 2, coffeeZone.y + coffeeZone.h / 2 + 4);
+
+      // Obstacles (Senior Dev Cubicle Tables)
+      obstacles.forEach((ob) => {
+        ctx.fillStyle = '#222b3a';
+        ctx.fillRect(ob.x, ob.y, ob.w, ob.h);
+        ctx.strokeStyle = '#364359';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(ob.x, ob.y, ob.w, ob.h);
+        ctx.fillStyle = '#8b949e';
+        ctx.font = '8px "Press Start 2P", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('SENIOR DESK', ob.x + ob.w / 2, ob.y + ob.h / 2 + 3);
+      });
+
+      // Player Workstation (Glowing when PRs remain)
+      const hasPending = state.prIndex < PR_SCENARIOS.length;
+      const pulse = 0.5 + 0.5 * Math.sin(performance.now() * 0.006);
+      ctx.fillStyle = hasPending ? `rgba(88, 166, 255, ${0.14 + pulse * 0.14})` : 'rgba(63, 185, 80, 0.12)';
+      ctx.fillRect(deskZone.x - 10, deskZone.y - 10, deskZone.w + 20, deskZone.h + 20);
+
+      ctx.fillStyle = '#1f293a';
+      ctx.fillRect(deskZone.x, deskZone.y, deskZone.w, deskZone.h);
+      ctx.strokeStyle = hasPending ? '#58a6ff' : '#3fb950';
+      ctx.lineWidth = 2.5;
+      ctx.strokeRect(deskZone.x, deskZone.y, deskZone.w, deskZone.h);
+
+      ctx.fillStyle = hasPending ? '#79c0ff' : '#7ee787';
+      ctx.font = '9px "Press Start 2P", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(hasPending ? 'PR READY!' : 'DONE!', deskZone.x + deskZone.w / 2, deskZone.y + deskZone.h / 2 + 4);
+
+      // Junior Dev Character
+      const p = state.player;
+      const half = p.size / 2;
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y + half + 2, half * 0.9, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = state.boostTimer > 0 ? '#e3b341' : '#3fb950';
+      ctx.fillRect(p.x - half, p.y - half, p.size, p.size);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(p.x - half, p.y - half, p.size, p.size);
+
+      // Eyes
+      ctx.fillStyle = '#0d1117';
+      if (p.facing === 'left') {
+        ctx.fillRect(p.x - 9, p.y - 5, 4, 4);
+      } else if (p.facing === 'right') {
+        ctx.fillRect(p.x + 5, p.y - 5, 4, 4);
+      } else if (p.facing === 'up') {
+        ctx.fillRect(p.x - 7, p.y - 10, 4, 3);
+        ctx.fillRect(p.x + 3, p.y - 10, 4, 3);
+      } else {
+        ctx.fillRect(p.x - 7, p.y - 3, 4, 4);
+        ctx.fillRect(p.x + 3, p.y - 3, 4, 4);
+      }
+    }
+
+    function loop(now) {
+      const dt = Math.min(0.05, (now - lastTime) / 1000);
+      lastTime = now;
+      update(dt);
+      drawOffice();
+      requestAnimationFrame(loop);
+    }
+
+    updateHUD();
+    requestAnimationFrame(loop);
+  </script>
 </body>
 </html>
