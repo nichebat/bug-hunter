@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bug Hunter: Junior Dev Edition (v0.1)</title>
+  <title>Bug Hunter: Junior Dev Edition (v0.2)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
@@ -71,15 +71,20 @@
       cursor: pointer;
     }
 
-    .retro-btn:hover {
+    .retro-btn:hover:not(:disabled) {
       filter: brightness(1.1);
       transform: translateY(-1px);
       box-shadow: 0 5px 0 #196127, 0 8px 15px rgba(0, 0, 0, 0.6);
     }
 
-    .retro-btn:active {
+    .retro-btn:active:not(:disabled) {
       transform: translateY(3px);
       box-shadow: 0 1px 0 #196127;
+    }
+
+    .retro-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
     }
 
     .retro-btn-blue {
@@ -88,11 +93,11 @@
       box-shadow: 0 4px 0 #0c3d8a, 0 6px 12px rgba(0, 0, 0, 0.5);
     }
 
-    .retro-btn-blue:hover {
+    .retro-btn-blue:hover:not(:disabled) {
       box-shadow: 0 5px 0 #0c3d8a, 0 8px 15px rgba(0, 0, 0, 0.6);
     }
 
-    .retro-btn-blue:active {
+    .retro-btn-blue:active:not(:disabled) {
       box-shadow: 0 1px 0 #0c3d8a;
     }
 
@@ -102,12 +107,26 @@
       box-shadow: 0 4px 0 #634202, 0 6px 12px rgba(0, 0, 0, 0.5);
     }
 
-    .retro-btn-amber:hover {
+    .retro-btn-amber:hover:not(:disabled) {
       box-shadow: 0 5px 0 #634202, 0 8px 15px rgba(0, 0, 0, 0.6);
     }
 
-    .retro-btn-amber:active {
+    .retro-btn-amber:active:not(:disabled) {
       box-shadow: 0 1px 0 #634202;
+    }
+
+    .retro-btn-purple {
+      background: linear-gradient(180deg, #8957e5 0%, #6e40c9 100%);
+      border-color: #bc8cff;
+      box-shadow: 0 4px 0 #3c1e70, 0 6px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .retro-btn-purple:hover:not(:disabled) {
+      box-shadow: 0 5px 0 #3c1e70, 0 8px 15px rgba(0, 0, 0, 0.6);
+    }
+
+    .retro-btn-purple:active:not(:disabled) {
+      box-shadow: 0 1px 0 #3c1e70;
     }
 
     /* Top HUD */
@@ -255,7 +274,7 @@
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(5, 8, 12, 0.82);
+      background: rgba(5, 8, 12, 0.84);
       backdrop-filter: blur(3px);
       display: none;
       align-items: center;
@@ -270,8 +289,8 @@
 
     .modal-box {
       width: 100%;
-      max-width: 780px;
-      max-height: 90vh;
+      max-width: 800px;
+      max-height: 92vh;
       overflow-y: auto;
       background: var(--panel-bg);
       border: 3px solid var(--panel-border);
@@ -282,6 +301,7 @@
 
     .modal-header {
       display: flex;
+      flex-wrap: wrap;
       align-items: flex-start;
       justify-content: space-between;
       gap: 12px;
@@ -303,6 +323,13 @@
       color: var(--text-muted);
     }
 
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
     .pr-badge {
       display: inline-block;
       font-family: var(--pixel-font);
@@ -313,6 +340,39 @@
       border: 1px solid var(--accent-purple);
       color: var(--accent-purple);
       white-space: nowrap;
+    }
+
+    .sev-badge {
+      display: inline-block;
+      font-family: var(--pixel-font);
+      font-size: 9px;
+      padding: 5px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .sev-minor {
+      background: rgba(88, 166, 255, 0.15);
+      border: 1px solid var(--accent-blue);
+      color: var(--accent-blue);
+    }
+
+    .sev-major {
+      background: rgba(210, 153, 34, 0.16);
+      border: 1px solid var(--accent-amber);
+      color: #f3d078;
+    }
+
+    .sev-outage {
+      background: rgba(248, 81, 73, 0.16);
+      border: 1px solid var(--accent-red);
+      color: #ffa198;
+    }
+
+    .sev-clean {
+      background: rgba(63, 185, 80, 0.16);
+      border: 1px solid var(--accent-green);
+      color: #aff5b4;
     }
 
     .pr-toolbar {
@@ -425,12 +485,21 @@
 
     .modal-footer {
       display: flex;
-      justify-content: flex-end;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
       gap: 10px;
     }
 
-    /* Start Screen */
-    #start-screen {
+    .footer-right {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-left: auto;
+    }
+
+    /* Start Screen & Shift Summary Screen */
+    .full-overlay {
       position: fixed;
       inset: 0;
       background: rgba(9, 12, 16, 0.94);
@@ -442,7 +511,7 @@
     }
 
     .start-card {
-      max-width: 640px;
+      max-width: 660px;
       width: 100%;
       background: var(--panel-bg);
       border: 3px solid var(--accent-green);
@@ -463,6 +532,7 @@
     .start-sub {
       font-family: var(--pixel-font);
       font-size: 10px;
+      line-height: 1.5;
       color: var(--accent-blue);
       margin: 0 0 18px 0;
     }
@@ -499,13 +569,42 @@
       color: var(--accent-amber);
       margin-bottom: 4px;
     }
+
+    .summary-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 20px 0 24px 0;
+      text-align: left;
+    }
+
+    .summary-stat-box {
+      background: #0d1117;
+      border: 2px solid var(--panel-border);
+      border-radius: 6px;
+      padding: 12px 14px;
+    }
+
+    .summary-stat-box span {
+      display: block;
+      font-family: var(--pixel-font);
+      font-size: 8px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .summary-stat-box strong {
+      font-family: var(--pixel-font);
+      font-size: 14px;
+      color: var(--accent-green);
+    }
   </style>
 </head>
 <body>
   <div id="game-wrap">
     <canvas id="office-canvas" width="960" height="600"></canvas>
 
-    <!-- Top HUD (Speedrun timer removed in v0.1) -->
+    <!-- Top HUD -->
     <div id="hud">
       <div class="hud-group">
         <div class="hud-card">
@@ -517,8 +616,8 @@
           <span id="hud-score" class="hud-value green">0</span>
         </div>
         <div class="hud-card">
-          <span class="hud-label">BUGS CAUGHT</span>
-          <span id="hud-caught" class="hud-value blue">0 / 10</span>
+          <span class="hud-label">PRS REVIEWED</span>
+          <span id="hud-reviewed" class="hud-value blue">0 / 12</span>
         </div>
         <div class="hud-card">
           <span class="hud-label">STREAK</span>
@@ -550,14 +649,14 @@
   </div>
 
   <!-- Start Screen -->
-  <div id="start-screen">
+  <div id="start-screen" class="full-overlay">
     <div class="start-card">
       <h1 class="start-title">BUG HUNTER</h1>
-      <div class="start-sub">JUNIOR DEV EDITION • V0.1 (RELAXED PACE + HINTS)</div>
+      <div class="start-sub">JUNIOR DEV EDITION • V0.2 (CLEAN PRS + SHIFT REPORT)</div>
       <p class="start-desc">
-        Senior developers are shipping pull requests fast—and leaving sneaky bugs behind.
-        Walk to your glowing workstation to inspect incoming diffs, click the buggy line of code,
-        and use <strong>Show Hint</strong> whenever you want a clue. No speedrun clock—take your time!
+        Senior developers are opening pull requests—some contain high-severity bugs, and a few are
+        completely clean! Inspect each diff at your desk: click the buggy line if something is broken,
+        or click <strong>Approve PR (No Bugs)</strong> if the code is safe to merge.
       </p>
       <div class="controls-grid">
         <div class="control-item">
@@ -565,15 +664,42 @@
           WASD or Arrow Keys (or D-Pad on touch screens)
         </div>
         <div class="control-item">
-          <strong>REVIEW CODE</strong>
-          Walk to your desk &amp; press Space / Enter or click the desk
+          <strong>BUGGY VS CLEAN</strong>
+          Click the buggy line, or click Approve PR if there are zero bugs
         </div>
         <div class="control-item">
-          <strong>COFFEE BOOST</strong>
-          Visit the breakroom espresso machine for faster movement
+          <strong>HINTS &amp; COFFEE</strong>
+          Use Show Hint anytime, and visit Espresso for +45% speed
         </div>
       </div>
-      <button id="start-btn" class="retro-btn" type="button">START SHIFT (V0.1)</button>
+      <button id="start-btn" class="retro-btn" type="button">START SHIFT (V0.2)</button>
+    </div>
+  </div>
+
+  <!-- Post-Shift Summary Screen -->
+  <div id="summary-screen" class="full-overlay" style="display: none;">
+    <div class="start-card" style="border-color: var(--accent-blue);">
+      <h1 class="start-title" style="color: var(--accent-blue);">SHIFT REPORT</h1>
+      <div class="start-sub">ALL 12 SENIOR DEV PULL REQUESTS REVIEWED</div>
+      <div class="summary-stats">
+        <div class="summary-stat-box">
+          <span>FINAL RANK</span>
+          <strong id="sum-rank" style="color: var(--accent-purple);">STAFF ENG</strong>
+        </div>
+        <div class="summary-stat-box">
+          <span>TOTAL SCORE</span>
+          <strong id="sum-score">0</strong>
+        </div>
+        <div class="summary-stat-box">
+          <span>FIRST-TRY ACCURACY</span>
+          <strong id="sum-accuracy" style="color: var(--accent-blue);">100%</strong>
+        </div>
+        <div class="summary-stat-box">
+          <span>HINTS USED</span>
+          <strong id="sum-hints" style="color: var(--accent-amber);">0</strong>
+        </div>
+      </div>
+      <button id="replay-btn" class="retro-btn" type="button">PLAY AGAIN (SHUFFLED)</button>
     </div>
   </div>
 
@@ -585,11 +711,14 @@
           <h2 id="pr-modal-title" class="pr-title">PR #101</h2>
           <div id="pr-modal-meta" class="pr-meta">Author: Senior Dev</div>
         </div>
-        <span id="pr-lang-badge" class="pr-badge">JAVASCRIPT</span>
+        <div class="badge-row">
+          <span id="pr-severity-badge" class="sev-badge sev-major">MAJOR • 150 PTS</span>
+          <span id="pr-lang-badge" class="pr-badge">JAVASCRIPT</span>
+        </div>
       </div>
 
       <div class="pr-toolbar">
-        <p class="pr-instruction">Click the <strong>exact line</strong> that contains the bug:</p>
+        <p class="pr-instruction">Click the <strong>buggy line</strong>—or click <strong>Approve PR</strong> if the code has no bugs:</p>
         <button id="hint-btn" class="retro-btn retro-btn-amber" type="button">SHOW HINT</button>
       </div>
 
@@ -600,8 +729,11 @@
       <div id="review-feedback"></div>
 
       <div class="modal-footer">
-        <button id="close-pr-btn" class="retro-btn retro-btn-blue" type="button">BACK TO DESK</button>
-        <button id="next-pr-btn" class="retro-btn" type="button" style="display: none;">NEXT PR</button>
+        <button id="approve-pr-btn" class="retro-btn retro-btn-purple" type="button">APPROVE PR (NO BUGS)</button>
+        <div class="footer-right">
+          <button id="close-pr-btn" class="retro-btn retro-btn-blue" type="button">BACK TO DESK</button>
+          <button id="next-pr-btn" class="retro-btn" type="button" style="display: none;">NEXT PR</button>
+        </div>
       </div>
     </div>
   </div>
@@ -647,9 +779,6 @@
           muted = !muted;
           return muted;
         },
-        isMuted() {
-          return muted;
-        },
         ping() {
           tone(784, 0.09, 'square', 0.05, 0);
           tone(1046, 0.12, 'square', 0.05, 0.09);
@@ -676,13 +805,15 @@
       };
     })();
 
-    // --- Pull Request Dataset (10 Senior Dev Bug Scenarios + Hints) ---
-    const PR_SCENARIOS = [
+    // --- Pull Request Dataset (10 Buggy PRs + 2 Clean PRs with Severity Levels) ---
+    const BASE_PR_SCENARIOS = [
       {
         id: 'PR #101',
         author: 'Marcus (Principal Backend)',
         title: 'Quick discount calculation for checkout',
         language: 'JAVASCRIPT',
+        severity: 'MAJOR',
+        basePoints: 150,
         hint: 'Check what happens to the total price when discountPercent is 20 (0.20 vs 20).',
         lines: [
           'function calculateCheckoutTotal(subtotal, discountPercent) {',
@@ -699,6 +830,8 @@
         author: 'Elena (Staff Platform)',
         title: 'Batch user cleanup helper',
         language: 'PYTHON',
+        severity: 'MAJOR',
+        basePoints: 150,
         hint: 'Look closely at mutating a list while iterating forward over it with a for-loop.',
         lines: [
           'def remove_inactive_users(users):',
@@ -715,6 +848,8 @@
         author: 'Devon (Senior DevOps)',
         title: 'Fallback API client config for staging',
         language: 'JAVASCRIPT',
+        severity: 'PROD-OUTAGE',
+        basePoints: 250,
         hint: 'Check if any hardcoded credential or test token was left in the fallback config.',
         lines: [
           'export function getApiClientConfig(env) {',
@@ -728,9 +863,28 @@
       },
       {
         id: 'PR #104',
+        author: 'Liam (Senior DBA)',
+        title: 'Parameterized user lookup query',
+        language: 'SQL',
+        severity: 'CLEAN',
+        basePoints: 150,
+        hint: 'Inspect the placeholder parameter ($1) and LIMIT clause—does this safely prevent SQL injection?',
+        lines: [
+          'SELECT id, email, role, created_at',
+          'FROM users',
+          'WHERE id = $1 AND deleted_at IS NULL',
+          'LIMIT 1;'
+        ],
+        bugLine: null,
+        explanation: 'Clean PR! Using a parameterized placeholder ($1), filtering out soft-deleted accounts, and capping with LIMIT 1 is safe and production-ready.'
+      },
+      {
+        id: 'PR #105',
         author: 'Priya (Lead Frontend)',
         title: 'Live search counter effect in React',
         language: 'REACT',
+        severity: 'PROD-OUTAGE',
+        basePoints: 250,
         hint: 'Look at the dependency array inside useEffect—updating searchCount triggers the effect again.',
         lines: [
           'useEffect(() => {',
@@ -742,10 +896,12 @@
         explanation: 'Including searchCount in the dependency array while calling setSearchCount inside the effect creates an infinite re-render loop!'
       },
       {
-        id: 'PR #105',
+        id: 'PR #106',
         author: 'Liam (Senior DBA)',
         title: 'Archive old support tickets script',
         language: 'SQL',
+        severity: 'PROD-OUTAGE',
+        basePoints: 250,
         hint: 'Look at the DELETE statement—is there a WHERE clause restricting which rows are deleted?',
         lines: [
           'BEGIN TRANSACTION;',
@@ -757,10 +913,12 @@
         explanation: 'A DELETE statement without a WHERE clause wipes out every single row in support_tickets, not just closed ones.'
       },
       {
-        id: 'PR #106',
+        id: 'PR #107',
         author: 'Marcus (Principal Backend)',
         title: 'Async retry backoff loop',
         language: 'JAVASCRIPT',
+        severity: 'MINOR',
+        basePoints: 100,
         hint: 'Check whether await is missing on the sleep/delay promise inside the loop.',
         lines: [
           'async function fetchWithRetry(url, retries = 3) {',
@@ -774,10 +932,12 @@
         explanation: 'Calling delay(...) without await fires all retries immediately without waiting for the backoff pause.'
       },
       {
-        id: 'PR #107',
+        id: 'PR #108',
         author: 'Elena (Staff Platform)',
         title: 'Safe dictionary lookup for feature flags',
         language: 'PYTHON',
+        severity: 'MINOR',
+        basePoints: 100,
         hint: 'Direct bracket indexing flags[flag_name] raises a KeyError if the key is missing.',
         lines: [
           'def is_feature_enabled(flags, flag_name):',
@@ -789,10 +949,31 @@
         explanation: 'Using flags[flag_name] instead of flags.get(flag_name, False) throws a KeyError whenever a new flag is not yet present.'
       },
       {
-        id: 'PR #108',
+        id: 'PR #109',
+        author: 'Priya (Lead Frontend)',
+        title: 'Immutable cart item quantity updater',
+        language: 'JAVASCRIPT',
+        severity: 'CLEAN',
+        basePoints: 150,
+        hint: 'Check whether .map() returns a fresh array and shallow-clones the updated item without mutating state.',
+        lines: [
+          'export function updateItemQuantity(items, targetId, nextQty) {',
+          '  const safeQty = Math.max(1, Number(nextQty) || 1);',
+          '  return items.map((item) =>',
+          '    item.id === targetId ? { ...item, quantity: safeQty } : item',
+          '  );',
+          '}'
+        ],
+        bugLine: null,
+        explanation: 'Clean PR! It sanitizes nextQty with a safe fallback and returns a new array without mutating the original state objects.'
+      },
+      {
+        id: 'PR #110',
         author: 'Priya (Lead Frontend)',
         title: 'Modal overlay click-through fix',
         language: 'CSS',
+        severity: 'MINOR',
+        basePoints: 100,
         hint: 'Look at pointer-events on the full-screen backdrop—none blocks clicks underneath.',
         lines: [
           '.modal-backdrop {',
@@ -806,10 +987,12 @@
         explanation: 'Setting pointer-events: none on a full-screen backdrop lets users click buttons and links behind the modal instead of interacting with it.'
       },
       {
-        id: 'PR #109',
+        id: 'PR #111',
         author: 'Devon (Senior DevOps)',
         title: 'Parse pagination page number safely',
         language: 'JAVASCRIPT',
+        severity: 'MINOR',
+        basePoints: 100,
         hint: 'parseInt without a radix or fallback can return NaN when pageParam is undefined or invalid.',
         lines: [
           'function getPageNumber(query) {',
@@ -822,10 +1005,12 @@
         explanation: 'When query.page is missing or non-numeric, parseInt(undefined) returns NaN, and Math.max(1, NaN) stays NaN.'
       },
       {
-        id: 'PR #110',
+        id: 'PR #112',
         author: 'Liam (Senior DBA)',
         title: 'Calculate average order value per customer',
         language: 'SQL',
+        severity: 'MAJOR',
+        basePoints: 150,
         hint: 'Selecting customer_id alongside AVG(total) requires a GROUP BY clause.',
         lines: [
           'SELECT customer_id, AVG(total) AS avg_order',
@@ -844,8 +1029,12 @@
 
     const state = {
       started: false,
+      queue: [...BASE_PR_SCENARIOS],
       score: 0,
-      caughtCount: 0,
+      reviewedCount: 0,
+      firstTrySuccesses: 0,
+      madeMistakeOnCurrent: false,
+      hintsUsed: 0,
       streak: 0,
       prIndex: 0,
       activePR: null,
@@ -876,7 +1065,7 @@
     // --- UI Elements ---
     const hudRole = document.getElementById('hud-role');
     const hudScore = document.getElementById('hud-score');
-    const hudCaught = document.getElementById('hud-caught');
+    const hudReviewed = document.getElementById('hud-reviewed');
     const hudStreak = document.getElementById('hud-streak');
     const boostPill = document.getElementById('boost-pill');
     const hudBoost = document.getElementById('hud-boost');
@@ -886,21 +1075,30 @@
     const startScreen = document.getElementById('start-screen');
     const startBtn = document.getElementById('start-btn');
 
+    const summaryScreen = document.getElementById('summary-screen');
+    const sumRank = document.getElementById('sum-rank');
+    const sumScore = document.getElementById('sum-score');
+    const sumAccuracy = document.getElementById('sum-accuracy');
+    const sumHints = document.getElementById('sum-hints');
+    const replayBtn = document.getElementById('replay-btn');
+
     const prModal = document.getElementById('pr-modal');
     const prTitle = document.getElementById('pr-modal-title');
     const prMeta = document.getElementById('pr-modal-meta');
+    const prSeverityBadge = document.getElementById('pr-severity-badge');
     const prLangBadge = document.getElementById('pr-lang-badge');
     const hintBtn = document.getElementById('hint-btn');
     const hintBanner = document.getElementById('hint-banner');
     const codeLinesEl = document.getElementById('code-lines');
     const reviewFeedback = document.getElementById('review-feedback');
+    const approvePrBtn = document.getElementById('approve-pr-btn');
     const closePrBtn = document.getElementById('close-pr-btn');
     const nextPrBtn = document.getElementById('next-pr-btn');
 
-    function getRoleTitle(caught) {
-      if (caught >= 9) return 'STAFF ENG';
-      if (caught >= 6) return 'SENIOR DEV';
-      if (caught >= 3) return 'MID DEV';
+    function getRoleTitle(reviewed) {
+      if (reviewed >= 11) return 'STAFF ENG';
+      if (reviewed >= 8) return 'SENIOR DEV';
+      if (reviewed >= 4) return 'MID DEV';
       return 'INTERN';
     }
 
@@ -915,9 +1113,9 @@
     }
 
     function updateHUD() {
-      hudRole.textContent = getRoleTitle(state.caughtCount);
+      hudRole.textContent = getRoleTitle(state.reviewedCount);
       hudScore.textContent = state.score;
-      hudCaught.textContent = `${state.caughtCount} / ${PR_SCENARIOS.length}`;
+      hudReviewed.textContent = `${state.reviewedCount} / ${state.queue.length}`;
       hudStreak.textContent = `${state.streak}x`;
 
       if (state.boostTimer > 0) {
@@ -947,28 +1145,84 @@
       );
     }
 
+    function showShiftSummary() {
+      prModal.classList.remove('active');
+      const total = state.queue.length;
+      const accuracy = Math.round((state.firstTrySuccesses / total) * 100);
+      sumRank.textContent = getRoleTitle(state.reviewedCount);
+      sumScore.textContent = state.score;
+      sumAccuracy.textContent = `${accuracy}% (${state.firstTrySuccesses}/${total})`;
+      sumHints.textContent = state.hintsUsed;
+      summaryScreen.style.display = 'flex';
+      AudioEngine.success();
+    }
+
+    function resetShift(shuffleQueue = false) {
+      const nextQueue = [...BASE_PR_SCENARIOS];
+      if (shuffleQueue) {
+        for (let i = nextQueue.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [nextQueue[i], nextQueue[j]] = [nextQueue[j], nextQueue[i]];
+        }
+      }
+      state.queue = nextQueue;
+      state.score = 0;
+      state.reviewedCount = 0;
+      state.firstTrySuccesses = 0;
+      state.madeMistakeOnCurrent = false;
+      state.hintsUsed = 0;
+      state.streak = 0;
+      state.prIndex = 0;
+      state.activePR = null;
+      state.prSolved = false;
+      state.boostTimer = 0;
+      state.player.x = 480;
+      state.player.y = 340;
+      state.player.facing = 'down';
+      summaryScreen.style.display = 'none';
+      updateHUD();
+      showToast('NEW SHIFT STARTED! WALK TO YOUR DESK TO REVIEW PRS.', '#58a6ff');
+    }
+
+    function applySeverityBadge(pr) {
+      prSeverityBadge.className = 'sev-badge';
+      if (pr.severity === 'CLEAN') {
+        prSeverityBadge.classList.add('sev-clean');
+      } else if (pr.severity === 'PROD-OUTAGE') {
+        prSeverityBadge.classList.add('sev-outage');
+      } else if (pr.severity === 'MAJOR') {
+        prSeverityBadge.classList.add('sev-major');
+      } else {
+        prSeverityBadge.classList.add('sev-minor');
+      }
+      prSeverityBadge.textContent = `${pr.severity} • ${pr.basePoints} PTS`;
+    }
+
     function openCurrentPR() {
       if (prModal.classList.contains('active')) return;
 
-      if (state.prIndex >= PR_SCENARIOS.length) {
-        showToast('ALL 10 SENIOR DEV BUGS CAUGHT! GREAT WORK!', '#3fb950');
+      if (state.prIndex >= state.queue.length) {
+        showShiftSummary();
         return;
       }
 
-      const pr = PR_SCENARIOS[state.prIndex];
+      const pr = state.queue[state.prIndex];
       state.activePR = pr;
       state.prSolved = false;
+      state.madeMistakeOnCurrent = false;
 
       prTitle.textContent = `${pr.id}: ${pr.title}`;
       prMeta.textContent = `Author: ${pr.author}`;
       prLangBadge.textContent = pr.language;
+      applySeverityBadge(pr);
 
-      // Reset Hint UI for this PR
+      // Reset Hint & Action buttons
       hintBanner.textContent = `Hint: ${pr.hint}`;
       hintBanner.classList.remove('visible');
       hintBtn.style.display = 'inline-block';
       hintBtn.textContent = 'SHOW HINT';
 
+      approvePrBtn.disabled = false;
       reviewFeedback.className = '';
       reviewFeedback.textContent = '';
       nextPrBtn.style.display = 'none';
@@ -998,38 +1252,74 @@
       AudioEngine.ping();
     }
 
+    function completeCurrentPR(successMessage) {
+      const pr = state.activePR;
+      state.prSolved = true;
+      state.reviewedCount += 1;
+      if (!state.madeMistakeOnCurrent) {
+        state.firstTrySuccesses += 1;
+      }
+      state.streak += 1;
+      const streakBonus = (state.streak - 1) * 25;
+      const pointsEarned = pr.basePoints + streakBonus;
+      state.score += pointsEarned;
+      state.prIndex += 1;
+
+      approvePrBtn.disabled = true;
+      reviewFeedback.className = 'success';
+      reviewFeedback.textContent = `${successMessage} (+${pointsEarned} pts) ${pr.explanation}`;
+
+      AudioEngine.success();
+      updateHUD();
+
+      nextPrBtn.style.display = 'inline-block';
+      nextPrBtn.textContent = state.prIndex < state.queue.length ? 'NEXT PR' : 'VIEW SHIFT REPORT';
+    }
+
     function handleLineClick(lineIndex, rowEl) {
       if (state.prSolved || !state.activePR) return;
 
       const pr = state.activePR;
-      if (lineIndex === pr.bugLine) {
-        state.prSolved = true;
-        state.caughtCount += 1;
-        state.streak += 1;
-        const pointsEarned = 100 + (state.streak - 1) * 25;
-        state.score += pointsEarned;
-        state.prIndex += 1;
-
-        rowEl.classList.add('correct');
-        reviewFeedback.className = 'success';
-        reviewFeedback.textContent = `Bug caught! (+${pointsEarned} pts) ${pr.explanation}`;
-
-        AudioEngine.success();
+      if (pr.bugLine === null) {
+        state.madeMistakeOnCurrent = true;
+        state.streak = 0;
+        state.score = Math.max(0, state.score - 25);
+        rowEl.classList.add('wrong');
+        reviewFeedback.className = 'error';
+        reviewFeedback.textContent = 'False alarm! This line is valid (-25 pts, streak reset). If the whole PR is safe, click APPROVE PR (NO BUGS).';
+        AudioEngine.error();
         updateHUD();
+        return;
+      }
 
-        if (state.prIndex < PR_SCENARIOS.length) {
-          nextPrBtn.style.display = 'inline-block';
-          nextPrBtn.textContent = 'NEXT PR';
-        } else {
-          nextPrBtn.style.display = 'none';
-          showToast('SHIFT COMPLETE! ALL 10 BUGS CAUGHT!', '#3fb950');
-        }
+      if (lineIndex === pr.bugLine) {
+        rowEl.classList.add('correct');
+        completeCurrentPR('Bug caught!');
       } else {
+        state.madeMistakeOnCurrent = true;
         state.streak = 0;
         state.score = Math.max(0, state.score - 25);
         rowEl.classList.add('wrong');
         reviewFeedback.className = 'error';
         reviewFeedback.textContent = 'Not that line (-25 pts, streak reset). Try clicking another line or use Show Hint!';
+        AudioEngine.error();
+        updateHUD();
+      }
+    }
+
+    function handleApproveClick() {
+      if (state.prSolved || !state.activePR) return;
+
+      const pr = state.activePR;
+      if (pr.bugLine === null) {
+        document.querySelectorAll('.code-line').forEach((el) => el.classList.add('correct'));
+        completeCurrentPR('Approved clean PR!');
+      } else {
+        state.madeMistakeOnCurrent = true;
+        state.streak = 0;
+        state.score = Math.max(0, state.score - 35);
+        reviewFeedback.className = 'error';
+        reviewFeedback.textContent = 'Careful! Approving this PR would ship a bug to production (-35 pts, streak reset). Click the buggy line instead!';
         AudioEngine.error();
         updateHUD();
       }
@@ -1059,6 +1349,10 @@
       showToast('WALK TO YOUR GLOWING DESK TO INSPECT PRS!', '#58a6ff');
     });
 
+    replayBtn.addEventListener('click', () => {
+      resetShift(true);
+    });
+
     muteBtn.addEventListener('click', () => {
       const isMuted = AudioEngine.toggleMute();
       muteBtn.textContent = isMuted ? 'SFX: OFF' : 'SFX: ON';
@@ -1067,8 +1361,11 @@
     hintBtn.addEventListener('click', () => {
       hintBanner.classList.add('visible');
       hintBtn.style.display = 'none';
+      state.hintsUsed += 1;
       AudioEngine.hint();
     });
+
+    approvePrBtn.addEventListener('click', handleApproveClick);
 
     closePrBtn.addEventListener('click', () => {
       prModal.classList.remove('active');
@@ -1076,8 +1373,10 @@
 
     nextPrBtn.addEventListener('click', () => {
       prModal.classList.remove('active');
-      if (state.prIndex < PR_SCENARIOS.length) {
+      if (state.prIndex < state.queue.length) {
         openCurrentPR();
+      } else {
+        showShiftSummary();
       }
     });
 
@@ -1138,7 +1437,7 @@
     let lastTime = performance.now();
 
     function update(dt) {
-      if (!state.started || prModal.classList.contains('active')) {
+      if (!state.started || prModal.classList.contains('active') || summaryScreen.style.display === 'flex') {
         interactPrompt.style.display = 'none';
         return;
       }
@@ -1184,9 +1483,9 @@
       if (nearZone(deskZone)) {
         interactPrompt.style.display = 'block';
         interactPrompt.style.borderColor = '#58a6ff';
-        interactPrompt.textContent = state.prIndex < PR_SCENARIOS.length
-          ? `PRESS SPACE / ENTER OR CLICK DESK TO REVIEW ${PR_SCENARIOS[state.prIndex].id}`
-          : 'ALL 10 BUGS CAUGHT! SHIFT COMPLETE';
+        interactPrompt.textContent = state.prIndex < state.queue.length
+          ? `PRESS SPACE / ENTER OR CLICK DESK TO REVIEW ${state.queue[state.prIndex].id}`
+          : 'PRESS SPACE / ENTER TO VIEW SHIFT REPORT';
       } else if (nearZone(coffeeZone)) {
         interactPrompt.style.display = 'block';
         interactPrompt.style.borderColor = '#d29922';
@@ -1243,8 +1542,8 @@
         ctx.fillText('SENIOR DESK', ob.x + ob.w / 2, ob.y + ob.h / 2 + 3);
       });
 
-      // Player Workstation (Glowing when PRs remain)
-      const hasPending = state.prIndex < PR_SCENARIOS.length;
+      // Player Workstation
+      const hasPending = state.prIndex < state.queue.length;
       const pulse = 0.5 + 0.5 * Math.sin(performance.now() * 0.006);
       ctx.fillStyle = hasPending ? `rgba(88, 166, 255, ${0.14 + pulse * 0.14})` : 'rgba(63, 185, 80, 0.12)';
       ctx.fillRect(deskZone.x - 10, deskZone.y - 10, deskZone.w + 20, deskZone.h + 20);
@@ -1258,7 +1557,7 @@
       ctx.fillStyle = hasPending ? '#79c0ff' : '#7ee787';
       ctx.font = '9px "Press Start 2P", monospace';
       ctx.textAlign = 'center';
-      ctx.fillText(hasPending ? 'PR READY!' : 'DONE!', deskZone.x + deskZone.w / 2, deskZone.y + deskZone.h / 2 + 4);
+      ctx.fillText(hasPending ? 'PR READY!' : 'REPORT!', deskZone.x + deskZone.w / 2, deskZone.y + deskZone.h / 2 + 4);
 
       // Junior Dev Character
       const p = state.player;
