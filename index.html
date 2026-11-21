@@ -572,7 +572,7 @@
 
     .summary-stats {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 12px;
       margin: 20px 0 24px 0;
       text-align: left;
@@ -698,6 +698,10 @@
           <span>HINTS USED</span>
           <strong id="sum-hints" style="color: var(--accent-amber);">0</strong>
         </div>
+        <div class="summary-stat-box">
+          <span>ALL-TIME BEST</span>
+          <strong id="sum-best-score" style="color: var(--accent-green);">0</strong>
+        </div>
       </div>
       <button id="replay-btn" class="retro-btn" type="button">PLAY AGAIN (SHUFFLED)</button>
     </div>
@@ -738,6 +742,7 @@
     </div>
   </div>
 
+  <script src="storage.js"></script>
   <script>
     // --- Synthesized Web Audio SFX ---
     const AudioEngine = (() => {
@@ -1036,6 +1041,7 @@
       madeMistakeOnCurrent: false,
       hintsUsed: 0,
       streak: 0,
+      bestRunStreak: 0,
       prIndex: 0,
       activePR: null,
       prSolved: false,
@@ -1080,6 +1086,7 @@
     const sumScore = document.getElementById('sum-score');
     const sumAccuracy = document.getElementById('sum-accuracy');
     const sumHints = document.getElementById('sum-hints');
+    const sumBestScore = document.getElementById('sum-best-score');
     const replayBtn = document.getElementById('replay-btn');
 
     const prModal = document.getElementById('pr-modal');
@@ -1149,10 +1156,15 @@
       prModal.classList.remove('active');
       const total = state.queue.length;
       const accuracy = Math.round((state.firstTrySuccesses / total) * 100);
+      const savedStats = window.BugHunterStorage
+        ? window.BugHunterStorage.recordShift(state.score, state.bestRunStreak)
+        : { bestScore: state.score };
+
       sumRank.textContent = getRoleTitle(state.reviewedCount);
       sumScore.textContent = state.score;
       sumAccuracy.textContent = `${accuracy}% (${state.firstTrySuccesses}/${total})`;
       sumHints.textContent = state.hintsUsed;
+      sumBestScore.textContent = savedStats.bestScore;
       summaryScreen.style.display = 'flex';
       AudioEngine.success();
     }
@@ -1172,6 +1184,7 @@
       state.madeMistakeOnCurrent = false;
       state.hintsUsed = 0;
       state.streak = 0;
+      state.bestRunStreak = 0;
       state.prIndex = 0;
       state.activePR = null;
       state.prSolved = false;
@@ -1260,6 +1273,7 @@
         state.firstTrySuccesses += 1;
       }
       state.streak += 1;
+      state.bestRunStreak = Math.max(state.bestRunStreak, state.streak);
       const streakBonus = (state.streak - 1) * 25;
       const pointsEarned = pr.basePoints + streakBonus;
       state.score += pointsEarned;
