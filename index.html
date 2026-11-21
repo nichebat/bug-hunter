@@ -3,1892 +3,1060 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bug Hunter: Junior Dev Edition (v0.4)</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <title>Bug Hunter: Junior Dev Edition (v0.5)</title>
   <style>
     :root {
-      --pixel-font: 'Press Start 2P', monospace;
-      --code-font: 'JetBrains Mono', monospace;
-      --bg-dark: #0d1117;
-      --panel-bg: #161b22;
-      --panel-border: #30363d;
-      --accent-green: #3fb950;
-      --accent-blue: #58a6ff;
-      --accent-amber: #d29922;
-      --accent-red: #f85149;
-      --accent-purple: #bc8cff;
-      --text-main: #e6edf3;
-      --text-muted: #8b949e;
+      --bg: #070b12;
+      --panel: #0d131f;
+      --card: #121a29;
+      --card-border: #253349;
+      --text: #e2e8f0;
+      --muted: #8fa3bd;
+      --green: #34d399;
+      --blue: #3b82f6;
+      --cyan: #38bdf8;
+      --red: #ef4444;
     }
 
     * {
       box-sizing: border-box;
-      user-select: none;
     }
 
-    html, body {
+    body {
       margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--bg-dark);
-      color: var(--text-main);
-      font-family: var(--code-font);
-      overflow: hidden;
-    }
-
-    #game-wrap {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: radial-gradient(circle at center, #161d29 0%, #090c10 100%);
-    }
-
-    canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-      image-rendering: pixelated;
-    }
-
-    /* Retro Button Styling */
-    .retro-btn {
-      font-family: var(--pixel-font);
-      font-size: 11px;
+      padding: 12px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Courier New", Courier, monospace;
       line-height: 1.4;
-      color: #ffffff;
-      background: linear-gradient(180deg, #2ea043 0%, #238636 100%);
-      border: 3px solid #3fb950;
-      border-radius: 4px;
-      padding: 10px 14px;
-      box-shadow: 0 4px 0 #196127, 0 6px 12px rgba(0, 0, 0, 0.5);
-      transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.15s ease;
+    }
+
+    button,
+    select {
+      font: inherit;
+      color: var(--text);
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 7px 12px;
       cursor: pointer;
     }
 
-    .retro-btn:hover:not(:disabled) {
-      filter: brightness(1.1);
-      transform: translateY(-1px);
-      box-shadow: 0 5px 0 #196127, 0 8px 15px rgba(0, 0, 0, 0.6);
+    button:hover,
+    select:hover {
+      border-color: var(--cyan);
     }
 
-    .retro-btn:active:not(:disabled) {
-      transform: translateY(3px);
-      box-shadow: 0 1px 0 #196127;
+    button:focus-visible,
+    select:focus-visible,
+    .code-line:focus-visible {
+      outline: 2px solid var(--cyan);
+      outline-offset: 2px;
     }
 
-    .retro-btn:disabled {
+    button:disabled {
       opacity: 0.45;
       cursor: not-allowed;
     }
 
-    .retro-btn-blue {
-      background: linear-gradient(180deg, #1f6feb 0%, #1158c7 100%);
-      border-color: #58a6ff;
-      box-shadow: 0 4px 0 #0c3d8a, 0 6px 12px rgba(0, 0, 0, 0.5);
+    .shell {
+      max-width: 1040px;
+      margin: 0 auto;
+      display: grid;
+      gap: 10px;
     }
 
-    .retro-btn-blue:hover:not(:disabled) {
-      box-shadow: 0 5px 0 #0c3d8a, 0 8px 15px rgba(0, 0, 0, 0.6);
-    }
-
-    .retro-btn-blue:active:not(:disabled) {
-      box-shadow: 0 1px 0 #0c3d8a;
-    }
-
-    .retro-btn-amber {
-      background: linear-gradient(180deg, #bb8009 0%, #9e6a03 100%);
-      border-color: #e3b341;
-      box-shadow: 0 4px 0 #634202, 0 6px 12px rgba(0, 0, 0, 0.5);
-    }
-
-    .retro-btn-amber:hover:not(:disabled) {
-      box-shadow: 0 5px 0 #634202, 0 8px 15px rgba(0, 0, 0, 0.6);
-    }
-
-    .retro-btn-amber:active:not(:disabled) {
-      box-shadow: 0 1px 0 #634202;
-    }
-
-    .retro-btn-purple {
-      background: linear-gradient(180deg, #8957e5 0%, #6e40c9 100%);
-      border-color: #bc8cff;
-      box-shadow: 0 4px 0 #3c1e70, 0 6px 12px rgba(0, 0, 0, 0.5);
-    }
-
-    .retro-btn-purple:hover:not(:disabled) {
-      box-shadow: 0 5px 0 #3c1e70, 0 8px 15px rgba(0, 0, 0, 0.6);
-    }
-
-    .retro-btn-purple:active:not(:disabled) {
-      box-shadow: 0 1px 0 #3c1e70;
-    }
-
-    .retro-btn-red {
-      background: linear-gradient(180deg, #da3633 0%, #b62324 100%);
-      border-color: #f85149;
-      box-shadow: 0 4px 0 #6e1617, 0 6px 12px rgba(0, 0, 0, 0.5);
-    }
-
-    .retro-btn-red:hover:not(:disabled) {
-      box-shadow: 0 5px 0 #6e1617, 0 8px 15px rgba(0, 0, 0, 0.6);
-    }
-
-    .retro-btn-red:active:not(:disabled) {
-      box-shadow: 0 1px 0 #6e1617;
-    }
-
-    /* Top HUD */
-    #hud {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      right: 12px;
+    .hud-bar {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      pointer-events: none;
-      z-index: 15;
-    }
-
-    .hud-group {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 10px;
-      pointer-events: auto;
-    }
-
-    .hud-card {
-      background: rgba(22, 27, 34, 0.92);
-      border: 2px solid var(--panel-border);
-      border-radius: 6px;
-      padding: 8px 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .hud-label {
-      font-family: var(--pixel-font);
-      font-size: 8px;
-      color: var(--text-muted);
-      letter-spacing: 0.5px;
-    }
-
-    .hud-value {
-      font-family: var(--pixel-font);
-      font-size: 12px;
-      color: var(--text-main);
-    }
-
-    .hud-value.green { color: var(--accent-green); }
-    .hud-value.blue { color: var(--accent-blue); }
-    .hud-value.amber { color: var(--accent-amber); }
-    .hud-value.purple { color: var(--accent-purple); }
-
-    /* Toast / Notification Banner */
-    #toast-banner {
-      position: fixed;
-      top: 76px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-20px);
-      background: rgba(22, 27, 34, 0.96);
-      border: 2px solid var(--accent-amber);
-      color: var(--text-main);
-      font-family: var(--pixel-font);
-      font-size: 10px;
-      line-height: 1.5;
-      padding: 10px 16px;
-      border-radius: 6px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s ease, transform 0.2s ease;
-      z-index: 20;
-      text-align: center;
-      max-width: 90vw;
-    }
-
-    #toast-banner.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    /* Action Prompt near bottom */
-    #interact-prompt {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(13, 17, 23, 0.94);
-      border: 2px solid var(--accent-green);
-      color: var(--text-main);
-      font-family: var(--pixel-font);
-      font-size: 10px;
-      padding: 10px 16px;
-      border-radius: 6px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
-      display: none;
-      z-index: 15;
-      text-align: center;
-    }
-
-    /* Touch Controls for Mobile / Small Screens */
-    #touch-controls {
-      position: fixed;
-      bottom: 16px;
-      left: 16px;
-      display: none;
-      grid-template-columns: repeat(3, 46px);
-      grid-template-rows: repeat(3, 46px);
-      gap: 4px;
-      z-index: 16;
-    }
-
-    .dpad-btn {
-      background: rgba(22, 27, 34, 0.88);
-      border: 2px solid var(--panel-border);
-      color: var(--text-main);
-      font-family: var(--pixel-font);
-      font-size: 12px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-
-    .dpad-btn:active {
-      background: var(--accent-blue);
-      color: #0d1117;
-    }
-
-    @media (max-width: 768px) {
-      #touch-controls {
-        display: grid;
-      }
-      .hud-card {
-        padding: 6px 9px;
-      }
-      .hud-value {
-        font-size: 10px;
-      }
-    }
-
-    /* Overlay & Modal System */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(5, 8, 12, 0.84);
-      backdrop-filter: blur(3px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      z-index: 30;
-    }
-
-    .modal-backdrop.active {
-      display: flex;
-    }
-
-    .modal-box {
-      width: 100%;
-      max-width: 800px;
-      max-height: 92vh;
-      overflow-y: auto;
-      background: var(--panel-bg);
-      border: 3px solid var(--panel-border);
+      gap: 8px;
+      background: var(--panel);
+      border: 1px solid var(--card-border);
       border-radius: 8px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-      padding: 22px;
+      padding: 8px 10px;
     }
 
-    .modal-header {
+    .hud-metrics {
       display: flex;
       flex-wrap: wrap;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-      border-bottom: 2px solid var(--panel-border);
-      padding-bottom: 14px;
-      margin-bottom: 16px;
+      gap: 8px;
     }
 
-    .pr-title {
-      font-family: var(--pixel-font);
-      font-size: 13px;
-      line-height: 1.5;
-      color: var(--accent-blue);
-      margin: 0 0 6px 0;
+    .hud-box {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 6px 12px;
+      min-width: 108px;
     }
 
-    .pr-meta {
-      font-size: 12px;
-      color: var(--text-muted);
+    .hud-box .k {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-transform: uppercase;
     }
 
-    .badge-row {
+    .hud-box .v {
+      font-size: 14px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .hud-box.role .v {
+      color: #a855f7;
+    }
+
+    .hud-box.score .v,
+    .hud-box.best .v {
+      color: var(--green);
+    }
+
+    .hud-box.reviewed .v {
+      color: var(--cyan);
+    }
+
+    .hud-box.streak .v {
+      color: var(--cyan);
+    }
+
+    .hud-actions {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       gap: 8px;
     }
 
-    .pr-badge {
-      display: inline-block;
-      font-family: var(--pixel-font);
-      font-size: 9px;
-      padding: 5px 8px;
+    .sfx-btn {
+      background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+      border: 1px solid #60a5fa;
+      color: #ffffff;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 8px 14px;
+      border-radius: 6px;
+    }
+
+    .sfx-btn.muted {
+      background: var(--card);
+      border-color: var(--card-border);
+      color: var(--muted);
+    }
+
+    .stage-wrap {
+      background: var(--panel);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
       border-radius: 4px;
-      background: rgba(188, 140, 255, 0.15);
-      border: 1px solid var(--accent-purple);
-      color: var(--accent-purple);
-      white-space: nowrap;
+      border: 1px solid #1c283b;
+      image-rendering: pixelated;
+      cursor: pointer;
     }
 
-    .sev-badge {
-      display: inline-block;
-      font-family: var(--pixel-font);
-      font-size: 9px;
-      padding: 5px 8px;
+    .banner {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-left: 3px solid var(--cyan);
       border-radius: 4px;
-      white-space: nowrap;
+      padding: 8px 12px;
+      font-size: 12px;
     }
 
-    .sev-minor {
-      background: rgba(88, 166, 255, 0.15);
-      border: 1px solid var(--accent-blue);
-      color: var(--accent-blue);
+    .banner.ok {
+      border-left-color: var(--green);
     }
 
-    .sev-major {
-      background: rgba(210, 153, 34, 0.16);
-      border: 1px solid var(--accent-amber);
-      color: #f3d078;
+    .banner.info {
+      border-left-color: var(--cyan);
     }
 
-    .sev-outage {
-      background: rgba(248, 81, 73, 0.16);
-      border: 1px solid var(--accent-red);
-      color: #ffa198;
+    .banner.bad {
+      border-left-color: var(--red);
     }
 
-    .sev-clean {
-      background: rgba(63, 185, 80, 0.16);
-      border: 1px solid var(--accent-green);
-      color: #aff5b4;
-    }
-
-    .pr-toolbar {
+    .meta-strip {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      margin-bottom: 12px;
+      background: var(--panel);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 12px;
     }
 
-    .pr-instruction {
-      font-size: 13px;
-      color: var(--text-main);
-      margin: 0;
+    .meta-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      color: var(--muted);
     }
 
-    #hint-banner {
+    .meta-stats strong {
+      color: var(--text);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 6, 12, 0.84);
       display: none;
-      background: rgba(210, 153, 34, 0.14);
-      border: 1px solid var(--accent-amber);
-      border-left: 4px solid var(--accent-amber);
-      border-radius: 6px;
-      padding: 11px 14px;
-      margin-bottom: 14px;
-      font-size: 13px;
-      line-height: 1.5;
-      color: #f3d078;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      z-index: 30;
     }
 
-    #hint-banner.visible {
-      display: block;
+    .modal-backdrop.open {
+      display: flex;
     }
 
-    /* Code Diff Viewer */
-    .code-container {
-      background: #090c10;
-      border: 2px solid var(--panel-border);
+    .modal-panel {
+      width: 100%;
+      max-width: 700px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: var(--panel);
+      border: 1px solid var(--cyan);
+      border-radius: 8px;
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 11px;
+    }
+
+    .badge {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      color: var(--cyan);
+    }
+
+    .modal-title {
+      margin: 6px 0 0;
+      font-size: 15px;
+    }
+
+    .code-box {
+      background: #070b12;
+      border: 1px solid var(--card-border);
       border-radius: 6px;
-      overflow-x: auto;
-      margin-bottom: 16px;
+      overflow: hidden;
     }
 
     .code-line {
       display: flex;
-      align-items: stretch;
-      font-family: var(--code-font);
-      font-size: 13px;
-      line-height: 1.6;
+      gap: 10px;
+      padding: 6px 10px;
+      border-bottom: 1px solid #111927;
       cursor: pointer;
-      border-left: 4px solid transparent;
-      transition: background 0.12s ease;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 12px;
     }
 
-    .code-line:hover {
-      background: rgba(88, 166, 255, 0.12);
-      border-left-color: var(--accent-blue);
+    .code-line:last-child {
+      border-bottom: none;
     }
 
-    .code-line.correct {
-      background: rgba(63, 185, 80, 0.22);
-      border-left-color: var(--accent-green);
-    }
-
-    .code-line.wrong {
-      background: rgba(248, 81, 73, 0.22);
-      border-left-color: var(--accent-red);
+    .code-line.selected {
+      background: #1d4ed8;
+      color: #ffffff;
     }
 
     .line-num {
-      width: 44px;
-      min-width: 44px;
-      text-align: right;
-      padding: 4px 10px 4px 6px;
-      color: var(--text-muted);
-      background: rgba(255, 255, 255, 0.02);
-      border-right: 1px solid #21262d;
+      color: var(--muted);
+      min-width: 22px;
       user-select: none;
     }
 
-    .line-code {
-      padding: 4px 14px;
-      white-space: pre;
-      color: var(--text-main);
-    }
-
-    /* Feedback Box inside Modal */
-    #review-feedback {
-      display: none;
-      padding: 14px;
-      border-radius: 6px;
-      margin-bottom: 16px;
-      font-size: 13px;
-      line-height: 1.6;
-    }
-
-    #review-feedback.success {
-      display: block;
-      background: rgba(63, 185, 80, 0.14);
-      border: 1px solid var(--accent-green);
-      color: #aff5b4;
-    }
-
-    #review-feedback.error {
-      display: block;
-      background: rgba(248, 81, 73, 0.14);
-      border: 1px solid var(--accent-red);
-      color: #ffa198;
-    }
-
-    .modal-footer {
+    .modal-foot {
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 8px;
     }
 
-    .footer-right {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-left: auto;
+    .btn-ok {
+      border-color: var(--green);
+      color: var(--green);
     }
 
-    /* Start Screen & Shift Summary Screen */
-    .full-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(9, 12, 16, 0.94);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      z-index: 40;
+    .btn-bad {
+      border-color: var(--red);
+      color: var(--red);
     }
 
-    .start-card {
-      max-width: 680px;
-      width: 100%;
-      background: var(--panel-bg);
-      border: 3px solid var(--accent-green);
-      border-radius: 8px;
-      padding: 28px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
-      text-align: center;
-    }
-
-    .start-title {
-      font-family: var(--pixel-font);
-      font-size: 20px;
-      line-height: 1.5;
-      color: var(--accent-green);
-      margin: 0 0 10px 0;
-    }
-
-    .start-sub {
-      font-family: var(--pixel-font);
-      font-size: 10px;
-      line-height: 1.5;
-      color: var(--accent-blue);
-      margin: 0 0 18px 0;
-    }
-
-    .start-desc {
-      font-size: 14px;
-      line-height: 1.65;
-      color: var(--text-main);
-      margin: 0 0 20px 0;
-      text-align: left;
-    }
-
-    .controls-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 10px;
-      margin-bottom: 22px;
-      text-align: left;
-    }
-
-    .control-item {
-      background: #0d1117;
-      border: 1px solid var(--panel-border);
-      border-radius: 6px;
-      padding: 10px 12px;
-      font-size: 12px;
-      line-height: 1.5;
-    }
-
-    .control-item strong {
-      display: block;
-      font-family: var(--pixel-font);
-      font-size: 9px;
-      color: var(--accent-amber);
-      margin-bottom: 4px;
-    }
-
-    .summary-stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-      margin: 20px 0 24px 0;
-      text-align: left;
-    }
-
-    .summary-stat-box {
-      background: #0d1117;
-      border: 2px solid var(--panel-border);
-      border-radius: 6px;
-      padding: 12px 14px;
-    }
-
-    .summary-stat-box span {
-      display: block;
-      font-family: var(--pixel-font);
-      font-size: 8px;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-    }
-
-    .summary-stat-box strong {
-      font-family: var(--pixel-font);
-      font-size: 13px;
-      color: var(--accent-green);
-    }
-
-    .summary-actions {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation: none !important;
+        transition: none !important;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="game-wrap">
-    <canvas id="office-canvas" width="960" height="600"></canvas>
-
-    <!-- Top HUD -->
-    <div id="hud">
-      <div class="hud-group">
-        <div class="hud-card">
-          <span class="hud-label">ROLE</span>
-          <span id="hud-role" class="hud-value purple">INTERN</span>
+  <div class="shell">
+    <header class="hud-bar" aria-label="HUD">
+      <div class="hud-metrics">
+        <div class="hud-box role">
+          <div class="k">ROLE</div>
+          <div id="hudRole" class="v">INTERN</div>
         </div>
-        <div class="hud-card">
-          <span class="hud-label">SCORE</span>
-          <span id="hud-score" class="hud-value green">0</span>
+        <div class="hud-box score">
+          <div class="k">SCORE</div>
+          <div id="hudScore" class="v">0</div>
         </div>
-        <div class="hud-card">
-          <span class="hud-label">BEST</span>
-          <span id="hud-best" class="hud-value green">0</span>
+        <div class="hud-box best">
+          <div class="k">BEST</div>
+          <div id="hudBest" class="v">0</div>
         </div>
-        <div class="hud-card">
-          <span class="hud-label">PRS REVIEWED</span>
-          <span id="hud-reviewed" class="hud-value blue">0 / 15</span>
+        <div class="hud-box reviewed">
+          <div class="k">PRS REVIEWED</div>
+          <div id="hudReviewed" class="v">0 / 15</div>
         </div>
-        <div class="hud-card">
-          <span class="hud-label">STREAK</span>
-          <span id="hud-streak" class="hud-value amber">0x</span>
+        <div class="hud-box streak">
+          <div class="k">STREAK</div>
+          <div id="hudStreak" class="v">0x</div>
         </div>
       </div>
 
-      <div class="hud-group">
-        <div id="boost-pill" class="hud-card" style="display: none; border-color: var(--accent-amber);">
-          <span class="hud-label">ESPRESSO BOOST</span>
-          <span id="hud-boost" class="hud-value amber">15.0s</span>
-        </div>
-        <button id="mute-btn" class="retro-btn retro-btn-blue" type="button">SFX: ON</button>
+      <div class="hud-actions">
+        <select id="presetSelect" aria-label="Shift length">
+          <option value="quick">10 PR SHIFT</option>
+          <option value="standard" selected>15 PR SHIFT</option>
+          <option value="overtime">20 PR SHIFT</option>
+        </select>
+        <button id="newShiftBtn" type="button">NEW SHIFT</button>
+        <button id="inspectBtn" type="button">REVIEW PR</button>
+        <button id="barHintBtn" type="button">HINT</button>
+        <button id="sfxBtn" type="button" class="sfx-btn" aria-pressed="true">SFX: ON</button>
       </div>
-    </div>
+    </header>
 
-    <div id="toast-banner"></div>
-    <div id="interact-prompt"></div>
+    <div id="storageNotice" class="banner info" role="status" aria-live="polite" style="display: none;"></div>
 
-    <!-- Mobile D-Pad -->
-    <div id="touch-controls" aria-label="Movement controls">
-      <div></div>
-      <button class="dpad-btn" data-dir="up" type="button">▲</button>
-      <div></div>
-      <button class="dpad-btn" data-dir="left" type="button">◀</button>
-      <button class="dpad-btn" data-dir="down" type="button">▼</button>
-      <button class="dpad-btn" data-dir="right" type="button">▶</button>
-    </div>
+    <main class="stage-wrap">
+      <canvas id="floorCanvas" width="980" height="560" aria-label="Bug Hunter office floor"></canvas>
+      <div id="statusBanner" class="banner" role="status" aria-live="polite">
+        WASD / Arrows to move. Walk to PR READY! or click PR READY! to review code; talk to MARCUS, ELENA, or PRIYA; visit ESPRESSO or CI/CD.
+      </div>
+    </main>
+
+    <section class="meta-strip" aria-label="Career log and controls">
+      <div id="shiftStatusText">Shift ready: 0 / 15 reviewed.</div>
+      <div class="meta-stats">
+        <span>ACC: <strong id="metaAcc">0%</strong></span>
+        <span>BEST STREAK: <strong id="metaStreak">0x</strong></span>
+        <span>SHIFTS: <strong id="metaShifts">0</strong></span>
+        <span>TOTAL PRS: <strong id="metaTotalPrs">0</strong></span>
+        <span>HINTS: <strong id="metaHints">0</strong></span>
+      </div>
+      <div class="hud-actions">
+        <button id="resetStatsBtn" type="button" class="btn-bad">RESET STATS</button>
+        <button id="confirmResetBtn" type="button" class="btn-bad" style="display: none;">CONFIRM</button>
+        <button id="cancelResetBtn" type="button" style="display: none;">CANCEL</button>
+      </div>
+    </section>
   </div>
 
-  <!-- Start Screen -->
-  <div id="start-screen" class="full-overlay">
-    <div class="start-card">
-      <h1 class="start-title">BUG HUNTER</h1>
-      <div class="start-sub">JUNIOR DEV EDITION • V0.4 (SENIOR NPCS + 7-TIER PROMOTIONS)</div>
-      <p class="start-desc">
-        Senior developers are opening 15 pull requests—some contain high-severity bugs, and a few are
-        completely clean! Climb from <strong>Intern</strong> through <strong>Junior Dev</strong> and
-        <strong>Software Dev</strong> all the way to <strong>Principal Eng</strong> while keeping the build server green.
-      </p>
-      <div class="controls-grid">
-        <div class="control-item">
-          <strong>MOVE AROUND</strong>
-          WASD or Arrow Keys (or D-Pad on touch screens)
+  <div id="reviewModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-panel">
+      <div>
+        <div class="badges">
+          <span id="modalId" class="badge">PR-000</span>
+          <span id="modalLang" class="badge">GO</span>
+          <span id="modalCategory" class="badge">SECURITY</span>
+          <span id="modalSeverity" class="badge">HIGH</span>
         </div>
-        <div class="control-item">
-          <strong>BUGGY VS CLEAN</strong>
-          Click the buggy line, or click Approve PR if there are zero bugs
-        </div>
-        <div class="control-item">
-          <strong>7 CAREER RANKS</strong>
-          Intern, Junior Dev, Software Dev, Mid Dev, Senior Dev, Staff Eng, Principal Eng
-        </div>
-      </div>
-      <button id="start-btn" class="retro-btn" type="button">START SHIFT (V0.4)</button>
-    </div>
-  </div>
-
-  <!-- Post-Shift Summary Screen -->
-  <div id="summary-screen" class="full-overlay" style="display: none;">
-    <div class="start-card" style="border-color: var(--accent-blue);">
-      <h1 class="start-title" style="color: var(--accent-blue);">SHIFT REPORT</h1>
-      <div class="start-sub">ALL 15 SENIOR DEV PULL REQUESTS REVIEWED</div>
-      <div class="summary-stats">
-        <div class="summary-stat-box">
-          <span>FINAL RANK</span>
-          <strong id="sum-rank" style="color: var(--accent-purple);">PRINCIPAL ENG</strong>
-        </div>
-        <div class="summary-stat-box">
-          <span>TOTAL SCORE</span>
-          <strong id="sum-score">0</strong>
-        </div>
-        <div class="summary-stat-box">
-          <span>FIRST-TRY ACCURACY</span>
-          <strong id="sum-accuracy" style="color: var(--accent-blue);">100%</strong>
-        </div>
-        <div class="summary-stat-box">
-          <span>HINTS USED</span>
-          <strong id="sum-hints" style="color: var(--accent-amber);">0</strong>
-        </div>
-        <div class="summary-stat-box">
-          <span>ALL-TIME BEST</span>
-          <strong id="sum-best-score" style="color: var(--accent-green);">0</strong>
-        </div>
-        <div class="summary-stat-box">
-          <span>BEST ACCURACY</span>
-          <strong id="sum-best-accuracy" style="color: var(--accent-blue);">0%</strong>
-        </div>
-      </div>
-      <div class="summary-actions">
-        <button id="replay-btn" class="retro-btn" type="button">PLAY AGAIN (SHUFFLED)</button>
-        <button id="reset-stats-btn" class="retro-btn retro-btn-red" type="button">RESET STATS</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Pull Request Review Modal -->
-  <div id="pr-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="pr-modal-title">
-    <div class="modal-box">
-      <div class="modal-header">
-        <div>
-          <h2 id="pr-modal-title" class="pr-title">PR #101</h2>
-          <div id="pr-modal-meta" class="pr-meta">Author: Senior Dev</div>
-        </div>
-        <div class="badge-row">
-          <span id="pr-severity-badge" class="sev-badge sev-major">MAJOR • 150 PTS</span>
-          <span id="pr-lang-badge" class="pr-badge">JAVASCRIPT</span>
-        </div>
+        <h2 id="modalTitle" class="modal-title">Pull Request Title</h2>
       </div>
 
-      <div class="pr-toolbar">
-        <p class="pr-instruction">Click the <strong>buggy line</strong>—or click <strong>Approve PR</strong> if the code has no bugs:</p>
-        <button id="hint-btn" class="retro-btn retro-btn-amber" type="button">SHOW HINT</button>
-      </div>
+      <div id="modalCodeLines" class="code-box" role="listbox" aria-label="Code lines"></div>
 
-      <div id="hint-banner"></div>
+      <div id="modalHint" class="banner info" style="display: none;"></div>
 
-      <div id="code-lines" class="code-container"></div>
-
-      <div id="review-feedback"></div>
-
-      <div class="modal-footer">
-        <button id="approve-pr-btn" class="retro-btn retro-btn-purple" type="button">APPROVE PR (NO BUGS)</button>
-        <div class="footer-right">
-          <button id="close-pr-btn" class="retro-btn retro-btn-blue" type="button">BACK TO DESK</button>
-          <button id="next-pr-btn" class="retro-btn" type="button" style="display: none;">NEXT PR</button>
+      <div class="modal-foot">
+        <div class="hud-actions">
+          <button id="hintBtn" type="button">HINT</button>
+          <button id="closeModalBtn" type="button">CLOSE [ESC]</button>
+        </div>
+        <div class="hud-actions">
+          <button id="approveBtn" type="button" class="btn-ok">APPROVE CLEAN</button>
+          <button id="flagBugBtn" type="button" class="btn-bad" disabled>FLAG SELECTED LINE</button>
         </div>
       </div>
     </div>
   </div>
 
+  <script src="bugHunterCore.js"></script>
+  <script src="prScenariosAndTests.js"></script>
   <script src="storage.js"></script>
   <script>
-    // --- Synthesized Web Audio SFX ---
-    const AudioEngine = (() => {
-      let ctx = null;
-      let muted = false;
+    (function () {
+      "use strict";
 
-      function ensureContext() {
-        if (!ctx) {
-          const AudioCtx = window.AudioContext || window.webkitAudioContext;
-          if (AudioCtx) ctx = new AudioCtx();
-        }
-        if (ctx && ctx.state === 'suspended') {
-          ctx.resume().catch(() => {});
-        }
-      }
+      var Core = window.BugHunterCore;
+      var Storage = window.BugHunterStorage;
+      var rawPool = (
+        window.BugHunterScenariosAndTests &&
+        window.BugHunterScenariosAndTests.PR_SCENARIOS
+      ) || [];
 
-      function tone(freq, duration, type = 'square', gainVal = 0.06, delay = 0) {
-        if (muted) return;
-        ensureContext();
-        if (!ctx) return;
+      var pool = rawPool.filter(function (pr) {
+        return Core.validatePullRequest(pr).valid;
+      });
 
-        const now = ctx.currentTime + delay;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, now);
-
-        gain.gain.setValueAtTime(gainVal, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + duration);
-      }
-
-      return {
-        toggleMute() {
-          muted = !muted;
-          return muted;
-        },
-        ping() {
-          tone(784, 0.09, 'square', 0.05, 0);
-          tone(1046, 0.12, 'square', 0.05, 0.09);
-        },
-        hint() {
-          tone(659, 0.08, 'triangle', 0.06, 0);
-          tone(880, 0.1, 'triangle', 0.06, 0.08);
-        },
-        success() {
-          tone(523.25, 0.09, 'square', 0.06, 0);
-          tone(659.25, 0.09, 'square', 0.06, 0.09);
-          tone(783.99, 0.09, 'square', 0.06, 0.18);
-          tone(1046.5, 0.2, 'square', 0.07, 0.27);
-        },
-        error() {
-          tone(220, 0.15, 'sawtooth', 0.06, 0);
-          tone(165, 0.22, 'sawtooth', 0.06, 0.14);
-        },
-        coffee() {
-          tone(440, 0.07, 'triangle', 0.07, 0);
-          tone(554.37, 0.07, 'triangle', 0.07, 0.07);
-          tone(659.25, 0.14, 'triangle', 0.07, 0.14);
-        }
+      var dom = {
+        hudRole: document.getElementById("hudRole"),
+        hudScore: document.getElementById("hudScore"),
+        hudBest: document.getElementById("hudBest"),
+        hudReviewed: document.getElementById("hudReviewed"),
+        hudStreak: document.getElementById("hudStreak"),
+        presetSelect: document.getElementById("presetSelect"),
+        newShiftBtn: document.getElementById("newShiftBtn"),
+        inspectBtn: document.getElementById("inspectBtn"),
+        barHintBtn: document.getElementById("barHintBtn"),
+        sfxBtn: document.getElementById("sfxBtn"),
+        storageNotice: document.getElementById("storageNotice"),
+        canvas: document.getElementById("floorCanvas"),
+        statusBanner: document.getElementById("statusBanner"),
+        shiftStatusText: document.getElementById("shiftStatusText"),
+        metaAcc: document.getElementById("metaAcc"),
+        metaStreak: document.getElementById("metaStreak"),
+        metaShifts: document.getElementById("metaShifts"),
+        metaTotalPrs: document.getElementById("metaTotalPrs"),
+        metaHints: document.getElementById("metaHints"),
+        resetStatsBtn: document.getElementById("resetStatsBtn"),
+        confirmResetBtn: document.getElementById("confirmResetBtn"),
+        cancelResetBtn: document.getElementById("cancelResetBtn"),
+        modal: document.getElementById("reviewModal"),
+        modalId: document.getElementById("modalId"),
+        modalLang: document.getElementById("modalLang"),
+        modalCategory: document.getElementById("modalCategory"),
+        modalSeverity: document.getElementById("modalSeverity"),
+        modalTitle: document.getElementById("modalTitle"),
+        modalCodeLines: document.getElementById("modalCodeLines"),
+        modalHint: document.getElementById("modalHint"),
+        hintBtn: document.getElementById("hintBtn"),
+        closeModalBtn: document.getElementById("closeModalBtn"),
+        approveBtn: document.getElementById("approveBtn"),
+        flagBugBtn: document.getElementById("flagBugBtn")
       };
-    })();
 
-    // --- Pull Request Dataset (15 PRs across JS, Python, SQL, React, CSS, and TypeScript) ---
-    const BASE_PR_SCENARIOS = [
-      {
-        id: 'PR #101',
-        author: 'Marcus (Principal Backend)',
-        title: 'Quick discount calculation for checkout',
-        language: 'JAVASCRIPT',
-        severity: 'MAJOR',
-        basePoints: 150,
-        hint: 'Check what happens to the total price when discountPercent is 20 (0.20 vs 20).',
-        lines: [
-          'function calculateCheckoutTotal(subtotal, discountPercent) {',
-          '  if (subtotal <= 0) return 0;',
-          '  const discountAmount = subtotal * discountPercent;',
-          '  return Number((subtotal - discountAmount).toFixed(2));',
-          '}'
-        ],
-        bugLine: 2,
-        explanation: 'Multiplying subtotal directly by 20 instead of (discountPercent / 100) subtracts 20x the subtotal and produces a negative total!'
-      },
-      {
-        id: 'PR #102',
-        author: 'Elena (Staff Platform)',
-        title: 'Batch user cleanup helper',
-        language: 'PYTHON',
-        severity: 'MAJOR',
-        basePoints: 150,
-        hint: 'Look closely at mutating a list while iterating forward over it with a for-loop.',
-        lines: [
-          'def remove_inactive_users(users):',
-          '    for user in users:',
-          '        if not user.get("active", False):',
-          '            users.remove(user)',
-          '    return users'
-        ],
-        bugLine: 3,
-        explanation: 'Removing items from a list while iterating over it shifts indices forward and skips the element right after a removed user.'
-      },
-      {
-        id: 'PR #103',
-        author: 'Devon (Senior DevOps)',
-        title: 'Fallback API client config for staging',
-        language: 'JAVASCRIPT',
-        severity: 'PROD-OUTAGE',
-        basePoints: 250,
-        hint: 'Check if any hardcoded credential or test token was left in the fallback config.',
-        lines: [
-          'export function getApiClientConfig(env) {',
-          '  const baseUrl = env === "prod" ? "https://api.example.com" : "https://staging.example.com";',
-          '  const apiKey = process.env.SERVICE_API_KEY || "FAKE_TEST_TOKEN_DO_NOT_COMMIT_123";',
-          '  return { baseUrl, apiKey, timeoutMs: 5000 };',
-          '}'
-        ],
-        bugLine: 2,
-        explanation: 'Hardcoding a token fallback in source code risks leaking credentials or silently authenticating with a dummy key in real environments.'
-      },
-      {
-        id: 'PR #104',
-        author: 'Liam (Senior DBA)',
-        title: 'Parameterized user lookup query',
-        language: 'SQL',
-        severity: 'CLEAN',
-        basePoints: 150,
-        hint: 'Inspect the placeholder parameter ($1) and LIMIT clause—does this safely prevent SQL injection?',
-        lines: [
-          'SELECT id, email, role, created_at',
-          'FROM users',
-          'WHERE id = $1 AND deleted_at IS NULL',
-          'LIMIT 1;'
-        ],
-        bugLine: null,
-        explanation: 'Clean PR! Using a parameterized placeholder ($1), filtering out soft-deleted accounts, and capping with LIMIT 1 is safe and production-ready.'
-      },
-      {
-        id: 'PR #105',
-        author: 'Priya (Lead Frontend)',
-        title: 'Live search counter effect in React',
-        language: 'REACT',
-        severity: 'PROD-OUTAGE',
-        basePoints: 250,
-        hint: 'Look at the dependency array inside useEffect—updating searchCount triggers the effect again.',
-        lines: [
-          'useEffect(() => {',
-          '  if (!query.trim()) return;',
-          '  setSearchCount(searchCount + 1);',
-          '}, [query, searchCount]);'
-        ],
-        bugLine: 2,
-        explanation: 'Including searchCount in the dependency array while calling setSearchCount inside the effect creates an infinite re-render loop!'
-      },
-      {
-        id: 'PR #106',
-        author: 'Liam (Senior DBA)',
-        title: 'Archive old support tickets script',
-        language: 'SQL',
-        severity: 'PROD-OUTAGE',
-        basePoints: 250,
-        hint: 'Look at the DELETE statement—is there a WHERE clause restricting which rows are deleted?',
-        lines: [
-          'BEGIN TRANSACTION;',
-          'SELECT COUNT(*) FROM support_tickets WHERE status = \'CLOSED\';',
-          'DELETE FROM support_tickets;',
-          'COMMIT;'
-        ],
-        bugLine: 2,
-        explanation: 'A DELETE statement without a WHERE clause wipes out every single row in support_tickets, not just closed ones.'
-      },
-      {
-        id: 'PR #107',
-        author: 'Marcus (Principal Backend)',
-        title: 'Async retry backoff loop',
-        language: 'JAVASCRIPT',
-        severity: 'MINOR',
-        basePoints: 100,
-        hint: 'Check whether await is missing on the sleep/delay promise inside the loop.',
-        lines: [
-          'async function fetchWithRetry(url, retries = 3) {',
-          '  for (let attempt = 1; attempt <= retries; attempt++) {',
-          '    try { return await fetch(url); }',
-          '    catch (err) { delay(200 * attempt); }',
-          '  }',
-          '}'
-        ],
-        bugLine: 3,
-        explanation: 'Calling delay(...) without await fires all retries immediately without waiting for the backoff pause.'
-      },
-      {
-        id: 'PR #108',
-        author: 'Elena (Staff Platform)',
-        title: 'Safe dictionary lookup for feature flags',
-        language: 'PYTHON',
-        severity: 'MINOR',
-        basePoints: 100,
-        hint: 'Direct bracket indexing flags[flag_name] raises a KeyError if the key is missing.',
-        lines: [
-          'def is_feature_enabled(flags, flag_name):',
-          '    if not isinstance(flags, dict):',
-          '        return False',
-          '    return bool(flags[flag_name])'
-        ],
-        bugLine: 3,
-        explanation: 'Using flags[flag_name] instead of flags.get(flag_name, False) throws a KeyError whenever a new flag is not yet present.'
-      },
-      {
-        id: 'PR #109',
-        author: 'Priya (Lead Frontend)',
-        title: 'Immutable cart item quantity updater',
-        language: 'JAVASCRIPT',
-        severity: 'CLEAN',
-        basePoints: 150,
-        hint: 'Check whether .map() returns a fresh array and shallow-clones the updated item without mutating state.',
-        lines: [
-          'export function updateItemQuantity(items, targetId, nextQty) {',
-          '  const safeQty = Math.max(1, Number(nextQty) || 1);',
-          '  return items.map((item) =>',
-          '    item.id === targetId ? { ...item, quantity: safeQty } : item',
-          '  );',
-          '}'
-        ],
-        bugLine: null,
-        explanation: 'Clean PR! It sanitizes nextQty with a safe fallback and returns a new array without mutating the original state objects.'
-      },
-      {
-        id: 'PR #110',
-        author: 'Priya (Lead Frontend)',
-        title: 'Modal overlay click-through fix',
-        language: 'CSS',
-        severity: 'MINOR',
-        basePoints: 100,
-        hint: 'Look at pointer-events on the full-screen backdrop—none blocks clicks underneath.',
-        lines: [
-          '.modal-backdrop {',
-          '  position: fixed;',
-          '  inset: 0;',
-          '  pointer-events: none;',
-          '  background: rgba(0, 0, 0, 0.7);',
-          '}'
-        ],
-        bugLine: 3,
-        explanation: 'Setting pointer-events: none on a full-screen backdrop lets users click buttons and links behind the modal instead of interacting with it.'
-      },
-      {
-        id: 'PR #111',
-        author: 'Devon (Senior DevOps)',
-        title: 'Parse pagination page number safely',
-        language: 'JAVASCRIPT',
-        severity: 'MINOR',
-        basePoints: 100,
-        hint: 'parseInt without a radix or fallback can return NaN when pageParam is undefined or invalid.',
-        lines: [
-          'function getPageNumber(query) {',
-          '  const raw = query.page;',
-          '  const page = parseInt(raw);',
-          '  return Math.max(1, page);',
-          '}'
-        ],
-        bugLine: 2,
-        explanation: 'When query.page is missing or non-numeric, parseInt(undefined) returns NaN, and Math.max(1, NaN) stays NaN.'
-      },
-      {
-        id: 'PR #112',
-        author: 'Liam (Senior DBA)',
-        title: 'Calculate average order value per customer',
-        language: 'SQL',
-        severity: 'MAJOR',
-        basePoints: 150,
-        hint: 'Selecting customer_id alongside AVG(total) requires a GROUP BY clause.',
-        lines: [
-          'SELECT customer_id, AVG(total) AS avg_order',
-          'FROM orders',
-          'WHERE status = \'PAID\'',
-          'ORDER BY avg_order DESC;'
-        ],
-        bugLine: 0,
-        explanation: 'Mixing an aggregate function like AVG(total) with a non-aggregated column (customer_id) without GROUP BY causes a SQL query error.'
-      },
-      {
-        id: 'PR #113',
-        author: 'Elena (Staff Platform)',
-        title: 'Read profile display name from API payload',
-        language: 'TYPESCRIPT',
-        severity: 'MAJOR',
-        basePoints: 150,
-        hint: 'Forcing a nullable response with `as Profile` bypasses null checks before reading `.displayName`.',
-        lines: [
-          'function formatGreeting(payload: unknown): string {',
-          '  const profile = payload as { displayName: string };',
-          '  return `Welcome back, ${profile.displayName}!`;',
-          '}'
-        ],
-        bugLine: 1,
-        explanation: 'Using a type assertion (`as`) on an unvalidated `unknown` payload does not guard against `null` or missing `displayName` at runtime.'
-      },
-      {
-        id: 'PR #114',
-        author: 'Marcus (Principal Backend)',
-        title: 'Render user bio note in activity feed',
-        language: 'JAVASCRIPT',
-        severity: 'PROD-OUTAGE',
-        basePoints: 250,
-        hint: 'Assigning untrusted user text directly to `.innerHTML` can execute injected HTML or scripts.',
-        lines: [
-          'function renderBioNote(container, bioText) {',
-          '  if (!container) return;',
-          '  container.innerHTML = bioText;',
-          '}'
-        ],
-        bugLine: 2,
-        explanation: 'Setting `.innerHTML` directly on raw user input introduces XSS risk; use `.textContent` instead for plain user text.'
-      },
-      {
-        id: 'PR #115',
-        author: 'Priya (Lead Frontend)',
-        title: 'Sticky table header wrapper styling',
-        language: 'CSS',
-        severity: 'MINOR',
-        basePoints: 100,
-        hint: 'Check what `overflow: hidden` on an ancestor does to `position: sticky` elements.',
-        lines: [
-          '.table-wrapper {',
-          '  max-height: 360px;',
-          '  overflow: hidden;',
-          '}'
-        ],
-        bugLine: 2,
-        explanation: '`overflow: hidden` breaks `position: sticky` descendants—use `overflow: auto` (or `clip` only when appropriate) for scrollable sticky headers.'
-      }
-    ];
+      var ctx = dom.canvas.getContext("2d");
 
-    // --- Game State ---
-    const canvas = document.getElementById('office-canvas');
-    const ctx = canvas.getContext('2d');
+      var sfxEnabled = true;
+      var audioCtx = null;
 
-    const initialStored = window.BugHunterStorage
-      ? window.BugHunterStorage.getStats()
-      : { bestScore: 0, lastScore: 0, bestStreak: 0, bestAccuracy: 0, shiftsCompleted: 0 };
-
-    const state = {
-      started: false,
-      queue: [...BASE_PR_SCENARIOS],
-      score: 0,
-      bestScore: initialStored.bestScore,
-      bestAccuracy: initialStored.bestAccuracy,
-      reviewedCount: 0,
-      firstTrySuccesses: 0,
-      madeMistakeOnCurrent: false,
-      hintsUsed: 0,
-      streak: 0,
-      bestRunStreak: 0,
-      prIndex: 0,
-      activePR: null,
-      prSolved: false,
-      boostTimer: 0,
-      buildAlertTimer: 0,
-      activeChatter: null,
-      chatterTimer: 0,
-      chatterCooldown: 2.0,
-      player: {
-        x: 480,
-        y: 340,
-        size: 28,
-        speed: 195,
-        facing: 'down'
-      },
-      keys: {},
-      touchDir: null,
-      toastTimeout: null
-    };
-
-    // World landmarks
-    const deskZone = { x: 430, y: 215, w: 100, h: 64, label: 'YOUR WORKSTATION' };
-    const coffeeZone = { x: 745, y: 145, w: 72, h: 64, label: 'ESPRESSO MACHINE' };
-    const serverRack = { x: 72, y: 415, w: 54, h: 112 };
-
-    const obstacles = [
-      {
-        x: 120,
-        y: 140,
-        w: 120,
-        h: 52,
-        npcName: 'MARCUS',
-        shirt: '#58a6ff',
-        quotes: ['Works on my machine!', 'Just a quick hotfix...', 'Tests are green locally!']
-      },
-      {
-        x: 120,
-        y: 250,
-        w: 120,
-        h: 52,
-        npcName: 'ELENA',
-        shirt: '#bc8cff',
-        quotes: ['Check the edge cases!', 'Did we handle null?', 'Keep it clean!']
-      },
-      {
-        x: 730,
-        y: 360,
-        w: 120,
-        h: 52,
-        npcName: 'PRIYA',
-        shirt: '#f778ba',
-        quotes: ['Ship before standup?', 'Watch that render loop!', 'CSS sticky is tricky!']
-      }
-    ];
-
-    // --- UI Elements ---
-    const hudRole = document.getElementById('hud-role');
-    const hudScore = document.getElementById('hud-score');
-    const hudBest = document.getElementById('hud-best');
-    const hudReviewed = document.getElementById('hud-reviewed');
-    const hudStreak = document.getElementById('hud-streak');
-    const boostPill = document.getElementById('boost-pill');
-    const hudBoost = document.getElementById('hud-boost');
-    const muteBtn = document.getElementById('mute-btn');
-    const toastBanner = document.getElementById('toast-banner');
-    const interactPrompt = document.getElementById('interact-prompt');
-    const startScreen = document.getElementById('start-screen');
-    const startBtn = document.getElementById('start-btn');
-
-    const summaryScreen = document.getElementById('summary-screen');
-    const sumRank = document.getElementById('sum-rank');
-    const sumScore = document.getElementById('sum-score');
-    const sumAccuracy = document.getElementById('sum-accuracy');
-    const sumHints = document.getElementById('sum-hints');
-    const sumBestScore = document.getElementById('sum-best-score');
-    const sumBestAccuracy = document.getElementById('sum-best-accuracy');
-    const replayBtn = document.getElementById('replay-btn');
-    const resetStatsBtn = document.getElementById('reset-stats-btn');
-
-    const prModal = document.getElementById('pr-modal');
-    const prTitle = document.getElementById('pr-modal-title');
-    const prMeta = document.getElementById('pr-modal-meta');
-    const prSeverityBadge = document.getElementById('pr-severity-badge');
-    const prLangBadge = document.getElementById('pr-lang-badge');
-    const hintBtn = document.getElementById('hint-btn');
-    const hintBanner = document.getElementById('hint-banner');
-    const codeLinesEl = document.getElementById('code-lines');
-    const reviewFeedback = document.getElementById('review-feedback');
-    const approvePrBtn = document.getElementById('approve-pr-btn');
-    const closePrBtn = document.getElementById('close-pr-btn');
-    const nextPrBtn = document.getElementById('next-pr-btn');
-
-    // 7-tier career ladder including Junior Dev, Software Dev, and Principal Eng
-    function getRoleTitle(reviewed) {
-      if (reviewed >= 15) return 'PRINCIPAL ENG';
-      if (reviewed >= 13) return 'STAFF ENG';
-      if (reviewed >= 10) return 'SENIOR DEV';
-      if (reviewed >= 7) return 'MID DEV';
-      if (reviewed >= 4) return 'SOFTWARE DEV';
-      if (reviewed >= 2) return 'JUNIOR DEV';
-      return 'INTERN';
-    }
-
-    function triggerChatter(preferredDeskIdx = null, customText = null) {
-      const idx = preferredDeskIdx !== null
-        ? preferredDeskIdx
-        : Math.floor(Math.random() * obstacles.length);
-      const desk = obstacles[idx];
-      const text = customText || desk.quotes[Math.floor(Math.random() * desk.quotes.length)];
-      state.activeChatter = { deskIdx: idx, text };
-      state.chatterTimer = 3.2;
-    }
-
-    function showToast(message, borderColor = '#d29922') {
-      toastBanner.textContent = message;
-      toastBanner.style.borderColor = borderColor;
-      toastBanner.classList.add('show');
-      clearTimeout(state.toastTimeout);
-      state.toastTimeout = setTimeout(() => {
-        toastBanner.classList.remove('show');
-      }, 2800);
-    }
-
-    function updateHUD() {
-      hudRole.textContent = getRoleTitle(state.reviewedCount);
-      hudScore.textContent = state.score;
-      hudBest.textContent = state.bestScore;
-      hudReviewed.textContent = `${state.reviewedCount} / ${state.queue.length}`;
-      hudStreak.textContent = `${state.streak}x`;
-
-      if (state.boostTimer > 0) {
-        boostPill.style.display = 'flex';
-        hudBoost.textContent = `${state.boostTimer.toFixed(1)}s`;
-      } else {
-        boostPill.style.display = 'none';
-      }
-    }
-
-    function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
-      return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
-    }
-
-    function nearZone(zone, pad = 26) {
-      const px = state.player.x - state.player.size / 2;
-      const py = state.player.y - state.player.size / 2;
-      return rectsOverlap(
-        px - pad,
-        py - pad,
-        state.player.size + pad * 2,
-        state.player.size + pad * 2,
-        zone.x,
-        zone.y,
-        zone.w,
-        zone.h
-      );
-    }
-
-    function showShiftSummary() {
-      prModal.classList.remove('active');
-      const total = state.queue.length;
-      const accuracy = Math.round((state.firstTrySuccesses / total) * 100);
-      const savedStats = window.BugHunterStorage
-        ? window.BugHunterStorage.recordShift(state.score, state.bestRunStreak, accuracy)
-        : {
-            bestScore: Math.max(state.bestScore, state.score),
-            bestAccuracy: Math.max(state.bestAccuracy, accuracy)
-          };
-
-      state.bestScore = savedStats.bestScore;
-      state.bestAccuracy = savedStats.bestAccuracy;
-      sumRank.textContent = getRoleTitle(state.reviewedCount);
-      sumScore.textContent = state.score;
-      sumAccuracy.textContent = `${accuracy}% (${state.firstTrySuccesses}/${total})`;
-      sumHints.textContent = state.hintsUsed;
-      sumBestScore.textContent = savedStats.bestScore;
-      sumBestAccuracy.textContent = `${savedStats.bestAccuracy}%`;
-      updateHUD();
-      summaryScreen.style.display = 'flex';
-      AudioEngine.success();
-    }
-
-    function resetShift(shuffleQueue = false) {
-      const nextQueue = [...BASE_PR_SCENARIOS];
-      if (shuffleQueue) {
-        for (let i = nextQueue.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [nextQueue[i], nextQueue[j]] = [nextQueue[j], nextQueue[i]];
+      function playTone(freq, duration, type) {
+        if (!sfxEnabled) return;
+        try {
+          var AudioCtor = window.AudioContext || window.webkitAudioContext;
+          if (!AudioCtor) return;
+          if (!audioCtx) audioCtx = new AudioCtor();
+          if (audioCtx.state === "suspended") audioCtx.resume();
+          var osc = audioCtx.createOscillator();
+          var gain = audioCtx.createGain();
+          osc.type = type || "square";
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + duration);
+        } catch (_err) {
+          // Audio blocked or unsupported
         }
       }
-      state.queue = nextQueue;
-      state.score = 0;
-      state.reviewedCount = 0;
-      state.firstTrySuccesses = 0;
-      state.madeMistakeOnCurrent = false;
-      state.hintsUsed = 0;
-      state.streak = 0;
-      state.bestRunStreak = 0;
-      state.prIndex = 0;
-      state.activePR = null;
-      state.prSolved = false;
-      state.boostTimer = 0;
-      state.buildAlertTimer = 0;
-      state.player.x = 480;
-      state.player.y = 340;
-      state.player.facing = 'down';
-      summaryScreen.style.display = 'none';
-      updateHUD();
-      triggerChatter(0, 'Fresh shift! Ready to review?');
-      showToast('NEW SHIFT STARTED! WALK TO YOUR DESK TO REVIEW PRS.', '#58a6ff');
-    }
 
-    function applySeverityBadge(pr) {
-      prSeverityBadge.className = 'sev-badge';
-      if (pr.severity === 'CLEAN') {
-        prSeverityBadge.classList.add('sev-clean');
-      } else if (pr.severity === 'PROD-OUTAGE') {
-        prSeverityBadge.classList.add('sev-outage');
-      } else if (pr.severity === 'MAJOR') {
-        prSeverityBadge.classList.add('sev-major');
-      } else {
-        prSeverityBadge.classList.add('sev-minor');
-      }
-      prSeverityBadge.textContent = `${pr.severity} • ${pr.basePoints} PTS`;
-    }
+      var player = {
+        x: 158,
+        y: 444,
+        w: 28,
+        h: 48,
+        speed: 205,
+        color: "#22c55e",
+        border: "#bbf7d0"
+      };
 
-    function openCurrentPR() {
-      if (prModal.classList.contains('active')) return;
+      var prDesk = {
+        x: 422,
+        y: 222,
+        w: 136,
+        h: 112,
+        glow: "rgba(59, 130, 246, 0.22)",
+        stroke: "#3b82f6",
+        fill: "#0b1324",
+        label: "PR READY!"
+      };
 
-      if (state.prIndex >= state.queue.length) {
-        showShiftSummary();
-        return;
-      }
+      var espressoBar = {
+        x: 744,
+        y: 162,
+        w: 92,
+        h: 108,
+        glow: "rgba(56, 189, 248, 0.14)",
+        stroke: "#38bdf8",
+        fill: "#111827",
+        label: "ESPRESSO"
+      };
 
-      const pr = state.queue[state.prIndex];
-      state.activePR = pr;
-      state.prSolved = false;
-      state.madeMistakeOnCurrent = false;
+      var ciRack = {
+        x: 78,
+        y: 404,
+        w: 64,
+        h: 146,
+        stroke: "#22c55e",
+        fill: "#0c1522",
+        label: "CI/CD"
+      };
 
-      prTitle.textContent = `${pr.id}: ${pr.title}`;
-      prMeta.textContent = `Author: ${pr.author}`;
-      prLangBadge.textContent = pr.language;
-      applySeverityBadge(pr);
-
-      // Reset Hint & Action buttons
-      hintBanner.textContent = `Hint: ${pr.hint}`;
-      hintBanner.classList.remove('visible');
-      hintBtn.style.display = 'inline-block';
-      hintBtn.textContent = 'SHOW HINT';
-
-      approvePrBtn.disabled = false;
-      reviewFeedback.className = '';
-      reviewFeedback.textContent = '';
-      nextPrBtn.style.display = 'none';
-
-      codeLinesEl.innerHTML = '';
-      pr.lines.forEach((lineText, idx) => {
-        const row = document.createElement('div');
-        row.className = 'code-line';
-        row.dataset.line = idx;
-
-        const numSpan = document.createElement('span');
-        numSpan.className = 'line-num';
-        numSpan.textContent = idx + 1;
-
-        const codeSpan = document.createElement('span');
-        codeSpan.className = 'line-code';
-        codeSpan.textContent = lineText;
-
-        row.appendChild(numSpan);
-        row.appendChild(codeSpan);
-
-        row.addEventListener('click', () => handleLineClick(idx, row));
-        codeLinesEl.appendChild(row);
-      });
-
-      prModal.classList.add('active');
-      AudioEngine.ping();
-    }
-
-    function completeCurrentPR(successMessage) {
-      const pr = state.activePR;
-      const prevRole = getRoleTitle(state.reviewedCount);
-      state.prSolved = true;
-      state.reviewedCount += 1;
-      const nextRole = getRoleTitle(state.reviewedCount);
-
-      if (!state.madeMistakeOnCurrent) {
-        state.firstTrySuccesses += 1;
-      }
-      state.streak += 1;
-      state.bestRunStreak = Math.max(state.bestRunStreak, state.streak);
-      const streakBonus = (state.streak - 1) * 25;
-      const pointsEarned = pr.basePoints + streakBonus;
-      state.score += pointsEarned;
-      if (state.score > state.bestScore) {
-        state.bestScore = state.score;
-      }
-      state.prIndex += 1;
-      state.buildAlertTimer = 0;
-
-      approvePrBtn.disabled = true;
-      const promoNote = nextRole !== prevRole ? ` PROMOTED TO ${nextRole}!` : '';
-      reviewFeedback.className = 'success';
-      reviewFeedback.textContent = `${successMessage} (+${pointsEarned} pts)${promoNote} ${pr.explanation}`;
-
-      if (nextRole !== prevRole) {
-        triggerChatter(null, `Congrats on ${nextRole}!`);
-      } else {
-        triggerChatter(null, 'Nice catch! Build green!');
-      }
-
-      AudioEngine.success();
-      updateHUD();
-
-      nextPrBtn.style.display = 'inline-block';
-      nextPrBtn.textContent = state.prIndex < state.queue.length ? 'NEXT PR' : 'VIEW SHIFT REPORT';
-    }
-
-    function handleLineClick(lineIndex, rowEl) {
-      if (state.prSolved || !state.activePR) return;
-
-      const pr = state.activePR;
-      if (pr.bugLine === null) {
-        state.madeMistakeOnCurrent = true;
-        state.streak = 0;
-        state.buildAlertTimer = 3.0;
-        state.score = Math.max(0, state.score - 25);
-        rowEl.classList.add('wrong');
-        reviewFeedback.className = 'error';
-        reviewFeedback.textContent = 'False alarm! This line is valid (-25 pts, streak reset). If the whole PR is safe, click APPROVE PR (NO BUGS).';
-        AudioEngine.error();
-        updateHUD();
-        return;
-      }
-
-      if (lineIndex === pr.bugLine) {
-        rowEl.classList.add('correct');
-        completeCurrentPR('Bug caught!');
-      } else {
-        state.madeMistakeOnCurrent = true;
-        state.streak = 0;
-        state.buildAlertTimer = 3.0;
-        state.score = Math.max(0, state.score - 25);
-        rowEl.classList.add('wrong');
-        reviewFeedback.className = 'error';
-        reviewFeedback.textContent = 'Not that line (-25 pts, streak reset). Try clicking another line or use Show Hint!';
-        AudioEngine.error();
-        updateHUD();
-      }
-    }
-
-    function handleApproveClick() {
-      if (state.prSolved || !state.activePR) return;
-
-      const pr = state.activePR;
-      if (pr.bugLine === null) {
-        document.querySelectorAll('.code-line').forEach((el) => el.classList.add('correct'));
-        completeCurrentPR('Approved clean PR!');
-      } else {
-        state.madeMistakeOnCurrent = true;
-        state.streak = 0;
-        state.buildAlertTimer = 4.0;
-        state.score = Math.max(0, state.score - 35);
-        reviewFeedback.className = 'error';
-        reviewFeedback.textContent = 'Careful! Approving this PR would ship a bug to production (-35 pts, streak reset). Click the buggy line instead!';
-        AudioEngine.error();
-        updateHUD();
-      }
-    }
-
-    function triggerCoffeeBoost() {
-      state.boostTimer = 15.0;
-      AudioEngine.coffee();
-      showToast('ESPRESSO BOOST! +45% SPEED FOR 15 SECONDS', '#d29922');
-      updateHUD();
-    }
-
-    function interactWithNearby() {
-      if (!state.started || prModal.classList.contains('active')) return;
-      if (nearZone(deskZone)) {
-        openCurrentPR();
-      } else if (nearZone(coffeeZone)) {
-        triggerCoffeeBoost();
-      }
-    }
-
-    // --- Event Listeners ---
-    startBtn.addEventListener('click', () => {
-      startScreen.style.display = 'none';
-      state.started = true;
-      updateHUD();
-      triggerChatter(0, 'PR #101 is ready at your desk!');
-      showToast('WALK TO YOUR GLOWING DESK TO INSPECT PRS!', '#58a6ff');
-    });
-
-    replayBtn.addEventListener('click', () => {
-      resetShift(true);
-    });
-
-    resetStatsBtn.addEventListener('click', () => {
-      if (window.BugHunterStorage) {
-        window.BugHunterStorage.clearStats();
-      }
-      state.bestScore = 0;
-      state.bestAccuracy = 0;
-      sumBestScore.textContent = '0';
-      sumBestAccuracy.textContent = '0%';
-      updateHUD();
-      showToast('SAVED STATS CLEARED!', '#f85149');
-    });
-
-    muteBtn.addEventListener('click', () => {
-      const isMuted = AudioEngine.toggleMute();
-      muteBtn.textContent = isMuted ? 'SFX: OFF' : 'SFX: ON';
-    });
-
-    hintBtn.addEventListener('click', () => {
-      hintBanner.classList.add('visible');
-      hintBtn.style.display = 'none';
-      state.hintsUsed += 1;
-      AudioEngine.hint();
-    });
-
-    approvePrBtn.addEventListener('click', handleApproveClick);
-
-    closePrBtn.addEventListener('click', () => {
-      prModal.classList.remove('active');
-    });
-
-    nextPrBtn.addEventListener('click', () => {
-      prModal.classList.remove('active');
-      if (state.prIndex < state.queue.length) {
-        openCurrentPR();
-      } else {
-        showShiftSummary();
-      }
-    });
-
-    canvas.addEventListener('click', (e) => {
-      if (!state.started || prModal.classList.contains('active')) return;
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      const cx = (e.clientX - rect.left) * scaleX;
-      const cy = (e.clientY - rect.top) * scaleY;
-
-      if (cx >= deskZone.x && cx <= deskZone.x + deskZone.w && cy >= deskZone.y && cy <= deskZone.y + deskZone.h) {
-        if (nearZone(deskZone, 45)) {
-          openCurrentPR();
-        } else {
-          showToast('WALK CLOSER TO YOUR WORKSTATION FIRST!', '#58a6ff');
+      var desks = [
+        {
+          name: "MARCUS",
+          x: 122,
+          y: 162,
+          w: 136,
+          h: 98,
+          charColor: "#38bdf8",
+          tip: "MARCUS: Watch out for auth redirect loops, constant-time token checks, and hardcoded secrets."
+        },
+        {
+          name: "ELENA",
+          x: 122,
+          y: 278,
+          w: 136,
+          h: 98,
+          charColor: "#c084fc",
+          tip: "ELENA: Check SQL queries for parameterized inputs, safe transactions, and row limits."
+        },
+        {
+          name: "PRIYA",
+          x: 742,
+          y: 388,
+          w: 136,
+          h: 98,
+          charColor: "#f472b6",
+          tip: "PRIYA: Avoid mutating shared state before validation completes or compiling regexes in loops."
         }
-      } else if (cx >= coffeeZone.x && cx <= coffeeZone.x + coffeeZone.w && cy >= coffeeZone.y && cy <= coffeeZone.y + coffeeZone.h) {
-        if (nearZone(coffeeZone, 45)) {
-          triggerCoffeeBoost();
-        } else {
-          showToast('WALK CLOSER TO THE ESPRESSO MACHINE!', '#d29922');
+      ];
+
+      var keys = Object.create(null);
+      var shift = null;
+      var hintsUsed = 0;
+      var rackOk = true;
+      var focusReturnEl = null;
+      var hudSignature = "";
+
+      function rectsHit(a, b) {
+        return (
+          a.x < b.x + b.w &&
+          a.x + a.w > b.x &&
+          a.y < b.y + b.h &&
+          a.y + a.h > b.y
+        );
+      }
+
+      function setBanner(kind, text) {
+        dom.statusBanner.className = "banner" + (kind ? " " + kind : "");
+        dom.statusBanner.textContent = text;
+      }
+
+      function syncStorageNotice() {
+        var persistent = Storage.isStorageAvailable();
+        var migratedFrom = Storage.getMigratedFrom();
+        if (!persistent) {
+          dom.storageNotice.style.display = "block";
+          dom.storageNotice.className = "banner info";
+          dom.storageNotice.textContent =
+            "Storage unavailable or restricted; progress is saved in memory for this session.";
+          return;
         }
-      } else {
-        obstacles.forEach((ob, idx) => {
-          if (cx >= ob.x && cx <= ob.x + ob.w && cy >= ob.y - 26 && cy <= ob.y + ob.h) {
-            triggerChatter(idx);
-          }
+        if (migratedFrom) {
+          dom.storageNotice.style.display = "block";
+          dom.storageNotice.className = "banner ok";
+          dom.storageNotice.textContent =
+            "Migrated stats from " + migratedFrom + " to " + Storage.STORAGE_KEY + ".";
+          return;
+        }
+        dom.storageNotice.style.display = "none";
+      }
+
+      function syncCareerMeta() {
+        var s = Storage.getStats();
+        dom.hudBest.textContent = String(s.bestScore);
+        dom.metaAcc.textContent = String(s.bestAccuracy) + "%";
+        dom.metaStreak.textContent = String(s.bestStreak) + "x";
+        dom.metaShifts.textContent = String(s.shiftsCompleted);
+        dom.metaTotalPrs.textContent = String(s.totalPrsReviewed);
+        dom.metaHints.textContent = String(s.hintsUsed);
+      }
+
+      function syncHud() {
+        if (!shift) return;
+        var total = shift.deck.length;
+        var rank = Core.getCareerRank(shift.score);
+        var sig = [
+          rank.rank,
+          shift.score,
+          shift.reviewedCount,
+          total,
+          shift.streak,
+          shift.completed ? 1 : 0
+        ].join("|");
+
+        if (sig === hudSignature) return;
+        hudSignature = sig;
+
+        dom.hudRole.textContent = rank.rank.toUpperCase();
+        dom.hudScore.textContent = String(shift.score);
+        dom.hudReviewed.textContent = shift.reviewedCount + " / " + total;
+        dom.hudStreak.textContent = shift.streak + "x";
+        dom.inspectBtn.disabled = shift.completed;
+        dom.barHintBtn.disabled = shift.completed;
+
+        if (!shift.completed) {
+          var nextInfo = rank.nextRank
+            ? "Next role: " + rank.nextRank + " at " + rank.nextRankScore + " pts."
+            : "Top role reached: Principal Eng.";
+          dom.shiftStatusText.textContent =
+            "Shift in progress: PR " +
+            Math.min(shift.currentIndex + 1, total) +
+            " of " +
+            total +
+            " (" +
+            shift.reviewedCount +
+            " reviewed). " +
+            nextInfo;
+        }
+      }
+
+      function startShift() {
+        var preset = Core.SHIFT_PRESETS[dom.presetSelect.value] || Core.SHIFT_PRESETS.standard;
+        var deck = Core.buildShiftDeck(pool, {
+          shiftLength: preset.prCount,
+          buggyCount: Math.round(preset.prCount / 2)
         });
+        shift = Core.createShiftState(deck);
+        hintsUsed = 0;
+        rackOk = true;
+        hudSignature = "";
+        playTone(520, 0.08, "square");
+        setBanner("ok", preset.label.toUpperCase() + " READY (" + preset.prCount + " PRs). Open PR READY! to review.");
+        syncHud();
       }
-    });
 
-    window.addEventListener('keydown', (e) => {
-      const k = e.key.toLowerCase();
-      state.keys[k] = true;
+      function renderModal() {
+        if (!shift || !shift.modalOpen || shift.completed) {
+          dom.modal.classList.remove("open");
+          return;
+        }
+        var pr = shift.deck[shift.currentIndex];
+        if (!pr) return;
 
-      if ((k === ' ' || k === 'enter') && state.started && !prModal.classList.contains('active')) {
-        if (nearZone(deskZone) || nearZone(coffeeZone)) {
-          e.preventDefault();
-          interactWithNearby();
+        dom.modal.classList.add("open");
+        dom.modalId.textContent = pr.id.toUpperCase();
+        dom.modalLang.textContent = pr.language.toUpperCase();
+        dom.modalCategory.textContent = pr.category.toUpperCase();
+        dom.modalSeverity.textContent = pr.severity.toUpperCase();
+        dom.modalTitle.textContent = pr.title;
+        dom.modalHint.style.display = "none";
+        dom.modalHint.textContent = "";
+
+        dom.modalCodeLines.innerHTML = "";
+        pr.lines.forEach(function (lineText, idx) {
+          var row = document.createElement("div");
+          row.className = "code-line" + (shift.selectedLine === idx ? " selected" : "");
+          row.tabIndex = 0;
+          row.setAttribute("role", "option");
+          row.setAttribute("aria-selected", shift.selectedLine === idx ? "true" : "false");
+
+          var num = document.createElement("span");
+          num.className = "line-num";
+          num.textContent = String(idx + 1).padStart(2, "0");
+
+          var code = document.createElement("span");
+          code.textContent = lineText;
+
+          row.appendChild(num);
+          row.appendChild(code);
+
+          row.addEventListener("click", function () {
+            shift = Core.selectCodeLine(shift, idx);
+            playTone(640, 0.04, "square");
+            renderModal();
+          });
+
+          row.addEventListener("keydown", function (ev) {
+            if (ev.key === "Enter" || ev.key === " ") {
+              ev.preventDefault();
+              shift = Core.selectCodeLine(shift, idx);
+              playTone(640, 0.04, "square");
+              renderModal();
+            }
+          });
+
+          dom.modalCodeLines.appendChild(row);
+        });
+
+        dom.flagBugBtn.disabled = shift.selectedLine === null;
+      }
+
+      function openModal(trigger) {
+        if (!shift || shift.completed) return;
+        focusReturnEl = trigger || document.activeElement;
+        shift = Core.openReviewModal(shift);
+        playTone(580, 0.06, "square");
+        renderModal();
+        dom.approveBtn.focus();
+      }
+
+      function closeModal() {
+        if (!shift) return;
+        shift = Core.closeReviewModal(shift);
+        renderModal();
+        if (focusReturnEl && typeof focusReturnEl.focus === "function") {
+          focusReturnEl.focus();
+          focusReturnEl = null;
         }
       }
-    });
 
-    window.addEventListener('keyup', (e) => {
-      state.keys[e.key.toLowerCase()] = false;
-    });
+      function submitReview(action) {
+        if (!shift || shift.completed) return;
+        shift = Core.submitReviewDecision(shift, action);
+        var out = shift.lastOutcome;
+        rackOk = Boolean(out && out.correct);
 
-    document.querySelectorAll('.dpad-btn').forEach((btn) => {
-      const dir = btn.dataset.dir;
-      btn.addEventListener('pointerdown', (e) => {
-        e.preventDefault();
-        state.touchDir = dir;
-      });
-      btn.addEventListener('pointerup', () => {
-        if (state.touchDir === dir) state.touchDir = null;
-      });
-      btn.addEventListener('pointerleave', () => {
-        if (state.touchDir === dir) state.touchDir = null;
-      });
-    });
-
-    // --- Update & Render Loop ---
-    let lastTime = performance.now();
-
-    function update(dt) {
-      if (!state.started || prModal.classList.contains('active') || summaryScreen.style.display === 'flex') {
-        interactPrompt.style.display = 'none';
-        return;
-      }
-
-      if (state.boostTimer > 0) {
-        state.boostTimer = Math.max(0, state.boostTimer - dt);
-        updateHUD();
-      }
-
-      if (state.buildAlertTimer > 0) {
-        state.buildAlertTimer = Math.max(0, state.buildAlertTimer - dt);
-      }
-
-      if (state.chatterTimer > 0) {
-        state.chatterTimer = Math.max(0, state.chatterTimer - dt);
-        if (state.chatterTimer === 0) {
-          state.activeChatter = null;
-          state.chatterCooldown = 4.5 + Math.random() * 3.0;
+        if (out.correct) {
+          playTone(760, 0.09, "square");
+        } else {
+          playTone(210, 0.14, "sawtooth");
         }
-      } else {
-        state.chatterCooldown -= dt;
-        if (state.chatterCooldown <= 0) {
-          triggerChatter();
+
+        var sign = out.pointsApplied >= 0 ? "+" : "";
+        setBanner(
+          out.correct ? "ok" : "bad",
+          out.reason + " (" + sign + out.pointsApplied + " pts) - " + out.explanation
+        );
+
+        closeModal();
+        syncHud();
+
+        if (shift.completed) {
+          var finalized = Storage.recordCompletedShift(shift, hintsUsed);
+          var sum = finalized.summary;
+          syncCareerMeta();
+          syncStorageNotice();
+          dom.shiftStatusText.textContent =
+            "Shift complete: " +
+            sum.score +
+            " pts | " +
+            sum.accuracy +
+            "% accuracy (" +
+            sum.correctCount +
+            "/" +
+            sum.reviewedCount +
+            ") | Best streak " +
+            sum.bestStreak +
+            "x | Role: " +
+            sum.rankInfo.rank;
         }
       }
 
-      let dx = 0;
-      let dy = 0;
-      if (state.keys['w'] || state.keys['arrowup'] || state.touchDir === 'up') dy -= 1;
-      if (state.keys['s'] || state.keys['arrowdown'] || state.touchDir === 'down') dy += 1;
-      if (state.keys['a'] || state.keys['arrowleft'] || state.touchDir === 'left') dx -= 1;
-      if (state.keys['d'] || state.keys['arrowright'] || state.touchDir === 'right') dx += 1;
+      function useHint() {
+        if (!shift || shift.completed) return;
+        var pr = shift.deck[shift.currentIndex];
+        if (!pr) return;
+        hintsUsed += 1;
+        playTone(460, 0.06, "triangle");
 
-      if (dx !== 0 && dy !== 0) {
-        const inv = 1 / Math.SQRT2;
-        dx *= inv;
-        dy *= inv;
+        var hintMessage =
+          pr.bugLine !== null
+            ? "Hint: Inspect line " + (pr.bugLine + 1) + " (" + pr.category + ")."
+            : "Hint: Evaluate this " + pr.language + " snippet carefully for bugs vs. clean code.";
+
+        if (pr.bugLine !== null) {
+          shift = Core.selectCodeLine(shift, pr.bugLine);
+        }
+
+        if (shift.modalOpen) {
+          renderModal();
+          dom.modalHint.textContent = hintMessage;
+          dom.modalHint.style.display = "block";
+        } else {
+          setBanner("info", hintMessage);
+        }
       }
 
-      if (Math.abs(dx) > Math.abs(dy)) {
-        state.player.facing = dx < 0 ? 'left' : 'right';
-      } else if (dy !== 0) {
-        state.player.facing = dy < 0 ? 'up' : 'down';
+      function updatePlayer(dt) {
+        if (!shift || shift.modalOpen) return;
+        var dx = 0;
+        var dy = 0;
+        if (keys["ArrowLeft"] || keys["KeyA"]) dx -= 1;
+        if (keys["ArrowRight"] || keys["KeyD"]) dx += 1;
+        if (keys["ArrowUp"] || keys["KeyW"]) dy -= 1;
+        if (keys["ArrowDown"] || keys["KeyS"]) dy += 1;
+        if (dx === 0 && dy === 0) return;
+
+        var mag = Math.hypot(dx, dy);
+        var nx = Math.max(16, Math.min(dom.canvas.width - player.w - 16, player.x + (dx / mag) * player.speed * dt));
+        var boxX = { x: nx, y: player.y, w: player.w, h: player.h };
+        var blockedX =
+          rectsHit(boxX, prDesk) ||
+          rectsHit(boxX, espressoBar) ||
+          rectsHit(boxX, ciRack) ||
+          desks.some(function (d) { return rectsHit(boxX, d); });
+        if (!blockedX) player.x = nx;
+
+        var ny = Math.max(16, Math.min(dom.canvas.height - player.h - 16, player.y + (dy / mag) * player.speed * dt));
+        var boxY = { x: player.x, y: ny, w: player.w, h: player.h };
+        var blockedY =
+          rectsHit(boxY, prDesk) ||
+          rectsHit(boxY, espressoBar) ||
+          rectsHit(boxY, ciRack) ||
+          desks.some(function (d) { return rectsHit(boxY, d); });
+        if (!blockedY) player.y = ny;
       }
 
-      const currentSpeed = state.boostTimer > 0 ? state.player.speed * 1.45 : state.player.speed;
-      const half = state.player.size / 2;
-
-      const nextX = Math.max(48 + half, Math.min(canvas.width - 48 - half, state.player.x + dx * currentSpeed * dt));
-      const blocksMove = (nx, ny) =>
-        obstacles.some((ob) => rectsOverlap(nx - half, ny - half, state.player.size, state.player.size, ob.x, ob.y, ob.w, ob.h)) ||
-        rectsOverlap(nx - half, ny - half, state.player.size, state.player.size, serverRack.x, serverRack.y, serverRack.w, serverRack.h);
-
-      if (!blocksMove(nextX, state.player.y)) {
-        state.player.x = nextX;
-      }
-
-      const nextY = Math.max(95 + half, Math.min(canvas.height - 40 - half, state.player.y + dy * currentSpeed * dt));
-      if (!blocksMove(state.player.x, nextY)) {
-        state.player.y = nextY;
-      }
-
-      // Context prompt
-      if (nearZone(deskZone)) {
-        interactPrompt.style.display = 'block';
-        interactPrompt.style.borderColor = '#58a6ff';
-        interactPrompt.textContent = state.prIndex < state.queue.length
-          ? `PRESS SPACE / ENTER OR CLICK DESK TO REVIEW ${state.queue[state.prIndex].id}`
-          : 'PRESS SPACE / ENTER TO VIEW SHIFT REPORT';
-      } else if (nearZone(coffeeZone)) {
-        interactPrompt.style.display = 'block';
-        interactPrompt.style.borderColor = '#d29922';
-        interactPrompt.textContent = 'PRESS SPACE / ENTER OR CLICK FOR ESPRESSO BOOST';
-      } else {
-        interactPrompt.style.display = 'none';
-      }
-    }
-
-    function drawServerRack() {
-      const currentPR = state.queue[state.prIndex];
-      const isAlert = state.buildAlertTimer > 0 || (currentPR && currentPR.severity === 'PROD-OUTAGE');
-      const statusColor = state.buildAlertTimer > 0
-        ? '#f85149'
-        : isAlert
-          ? '#d29922'
-          : '#3fb950';
-
-      ctx.fillStyle = '#121722';
-      ctx.fillRect(serverRack.x, serverRack.y, serverRack.w, serverRack.h);
-      ctx.strokeStyle = statusColor;
-      ctx.lineWidth = 2;
-      ctx.strokeRect(serverRack.x, serverRack.y, serverRack.w, serverRack.h);
-
-      // Server blades + blinking LEDs
-      const blink = Math.floor(performance.now() / 350) % 2 === 0;
-      for (let i = 0; i < 4; i++) {
-        const bladeY = serverRack.y + 12 + i * 22;
-        ctx.fillStyle = '#1d2534';
-        ctx.fillRect(serverRack.x + 7, bladeY, serverRack.w - 14, 15);
-        ctx.fillStyle = (i + (blink ? 1 : 0)) % 2 === 0 ? statusColor : '#58a6ff';
-        ctx.fillRect(serverRack.x + 11, bladeY + 5, 5, 5);
-        ctx.fillStyle = '#8b949e';
-        ctx.fillRect(serverRack.x + 21, bladeY + 6, 20, 3);
-      }
-
-      ctx.fillStyle = statusColor;
-      ctx.font = '7px "Press Start 2P", monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('CI/CD', serverRack.x + serverRack.w / 2, serverRack.y - 6);
-    }
-
-    function drawSeniorDesksAndNPCs() {
-      obstacles.forEach((ob, idx) => {
-        // Senior Dev pixel avatar seated behind desk
-        const avatarX = ob.x + ob.w / 2 - 11;
-        const avatarY = ob.y - 20;
-        ctx.fillStyle = ob.shirt;
-        ctx.fillRect(avatarX, avatarY, 22, 20);
-        ctx.strokeStyle = '#e6edf3';
-        ctx.lineWidth = 1.5;
-        ctx.strokeRect(avatarX, avatarY, 22, 20);
-
-        // Eyes looking down toward desk
-        ctx.fillStyle = '#0d1117';
-        ctx.fillRect(avatarX + 5, avatarY + 8, 3, 3);
-        ctx.fillRect(avatarX + 14, avatarY + 8, 3, 3);
-
-        // Desk surface
-        ctx.fillStyle = '#222b3a';
-        ctx.fillRect(ob.x, ob.y, ob.w, ob.h);
-        ctx.strokeStyle = '#364359';
+      function drawLittleCharacter(x, y, w, h, bodyColor, eyeColor) {
+        ctx.fillStyle = bodyColor;
+        ctx.fillRect(x, y, w, h);
+        ctx.strokeStyle = "#0b111c";
         ctx.lineWidth = 2;
-        ctx.strokeRect(ob.x, ob.y, ob.w, ob.h);
+        ctx.strokeRect(x, y, w, h);
 
-        ctx.fillStyle = '#8b949e';
-        ctx.font = '8px "Press Start 2P", monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText(ob.npcName, ob.x + ob.w / 2, ob.y + ob.h / 2 + 3);
+        ctx.fillStyle = eyeColor || "#090d14";
+        var eyeY = y + Math.min(10, Math.floor(h * 0.34));
+        ctx.fillRect(x + Math.floor(w * 0.25), eyeY, 3, 4);
+        ctx.fillRect(x + Math.floor(w * 0.62), eyeY, 3, 4);
+      }
 
-        // Speech bubble if active
-        if (state.activeChatter && state.activeChatter.deskIdx === idx) {
-          const msg = state.activeChatter.text;
-          ctx.font = '11px "JetBrains Mono", monospace';
-          const textW = ctx.measureText(msg).width;
-          const boxW = textW + 18;
-          const boxH = 26;
-          const bx = Math.max(16, Math.min(canvas.width - boxW - 16, ob.x + ob.w / 2 - boxW / 2));
-          const by = Math.max(96, avatarY - 34);
-
-          ctx.fillStyle = 'rgba(13, 17, 23, 0.95)';
-          ctx.fillRect(bx, by, boxW, boxH);
-          ctx.strokeStyle = ob.shirt;
-          ctx.lineWidth = 1.5;
-          ctx.strokeRect(bx, by, boxW, boxH);
-
-          ctx.fillStyle = '#e6edf3';
-          ctx.textAlign = 'center';
-          ctx.fillText(msg, bx + boxW / 2, by + 17);
-        }
-      });
-    }
-
-    function drawOffice() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Floor tiles
-      ctx.fillStyle = '#141923';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      const tileSize = 40;
-      for (let y = 80; y < canvas.height; y += tileSize) {
-        for (let x = 0; x < canvas.width; x += tileSize) {
-          if (((x / tileSize) + (y / tileSize)) % 2 === 0) {
-            ctx.fillStyle = '#181e2a';
-            ctx.fillRect(x, y, tileSize, tileSize);
+      function drawScene() {
+        var tile = 48;
+        for (var row = 0; row < Math.ceil(dom.canvas.height / tile); row++) {
+          for (var col = 0; col < Math.ceil(dom.canvas.width / tile); col++) {
+            ctx.fillStyle = (row + col) % 2 === 0 ? "#0e1522" : "#121b2b";
+            ctx.fillRect(col * tile, row * tile, tile, tile);
           }
         }
+
+        ctx.font = "bold 13px 'Courier New', monospace";
+        ctx.textAlign = "center";
+
+        desks.forEach(function (d) {
+          drawLittleCharacter(d.x + d.w / 2 - 14, d.y - 34, 28, 30, d.charColor, "#0b111c");
+          ctx.fillStyle = "#162032";
+          ctx.strokeStyle = "#334155";
+          ctx.lineWidth = 2;
+          ctx.fillRect(d.x, d.y, d.w, d.h);
+          ctx.strokeRect(d.x, d.y, d.w, d.h);
+          ctx.fillStyle = "#94a3b8";
+          ctx.fillText(d.name, d.x + d.w / 2, d.y + d.h / 2 + 5);
+        });
+
+        ctx.fillStyle = prDesk.glow;
+        ctx.fillRect(prDesk.x - 10, prDesk.y - 10, prDesk.w + 20, prDesk.h + 20);
+        ctx.fillStyle = prDesk.fill;
+        ctx.strokeStyle = prDesk.stroke;
+        ctx.lineWidth = 2.5;
+        ctx.fillRect(prDesk.x, prDesk.y, prDesk.w, prDesk.h);
+        ctx.strokeRect(prDesk.x, prDesk.y, prDesk.w, prDesk.h);
+        ctx.fillStyle = "#60a5fa";
+        ctx.fillText(prDesk.label, prDesk.x + prDesk.w / 2, prDesk.y + prDesk.h / 2 + 5);
+
+        ctx.fillStyle = espressoBar.glow;
+        ctx.fillRect(espressoBar.x - 8, espressoBar.y - 8, espressoBar.w + 16, espressoBar.h + 16);
+        ctx.fillStyle = espressoBar.fill;
+        ctx.strokeStyle = espressoBar.stroke;
+        ctx.lineWidth = 2;
+        ctx.fillRect(espressoBar.x, espressoBar.y, espressoBar.w, espressoBar.h);
+        ctx.strokeRect(espressoBar.x, espressoBar.y, espressoBar.w, espressoBar.h);
+        ctx.fillStyle = "#38bdf8";
+        ctx.fillText(espressoBar.label, espressoBar.x + espressoBar.w / 2, espressoBar.y + espressoBar.h / 2 + 5);
+
+        ctx.fillStyle = rackOk ? "#22c55e" : "#ef4444";
+        ctx.fillText(ciRack.label, ciRack.x + ciRack.w / 2, ciRack.y - 10);
+        ctx.fillStyle = ciRack.fill;
+        ctx.strokeStyle = rackOk ? "#22c55e" : "#ef4444";
+        ctx.lineWidth = 2;
+        ctx.fillRect(ciRack.x, ciRack.y, ciRack.w, ciRack.h);
+        ctx.strokeRect(ciRack.x, ciRack.y, ciRack.w, ciRack.h);
+
+        var bladeColors = rackOk ? ["#22c55e", "#3b82f6", "#22c55e", "#3b82f6"] : ["#ef4444", "#38bdf8", "#ef4444", "#3b82f6"];
+        for (var b = 0; b < 4; b++) {
+          var by = ciRack.y + 12 + b * 32;
+          ctx.fillStyle = "#182436";
+          ctx.fillRect(ciRack.x + 8, by, ciRack.w - 16, 22);
+          ctx.fillStyle = bladeColors[b];
+          ctx.fillRect(ciRack.x + 13, by + 8, 6, 6);
+          ctx.fillStyle = "#94a3b8";
+          ctx.fillRect(ciRack.x + 25, by + 9, 24, 4);
+        }
+
+        drawLittleCharacter(player.x, player.y, player.w, player.h, player.color, "#08130c");
+        ctx.textAlign = "left";
       }
 
-      // Top office wall
-      ctx.fillStyle = '#0e1219';
-      ctx.fillRect(0, 0, canvas.width, 90);
-      ctx.fillStyle = '#262f40';
-      ctx.fillRect(0, 86, canvas.width, 4);
+      function interactNearby() {
+        var reach = {
+          x: player.x - 16,
+          y: player.y - 16,
+          w: player.w + 32,
+          h: player.h + 32
+        };
 
-      // Breakroom / Coffee area highlight
-      ctx.fillStyle = 'rgba(210, 153, 34, 0.08)';
-      ctx.fillRect(coffeeZone.x - 12, coffeeZone.y - 12, coffeeZone.w + 24, coffeeZone.h + 24);
-      ctx.strokeStyle = '#d29922';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(coffeeZone.x, coffeeZone.y, coffeeZone.w, coffeeZone.h);
-      ctx.fillStyle = '#e3b341';
-      ctx.font = '9px "Press Start 2P", monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('ESPRESSO', coffeeZone.x + coffeeZone.w / 2, coffeeZone.y + coffeeZone.h / 2 + 4);
-
-      drawServerRack();
-      drawSeniorDesksAndNPCs();
-
-      // Player Workstation
-      const hasPending = state.prIndex < state.queue.length;
-      const pulse = 0.5 + 0.5 * Math.sin(performance.now() * 0.006);
-      ctx.fillStyle = hasPending ? `rgba(88, 166, 255, ${0.14 + pulse * 0.14})` : 'rgba(63, 185, 80, 0.12)';
-      ctx.fillRect(deskZone.x - 10, deskZone.y - 10, deskZone.w + 20, deskZone.h + 20);
-
-      ctx.fillStyle = '#1f293a';
-      ctx.fillRect(deskZone.x, deskZone.y, deskZone.w, deskZone.h);
-      ctx.strokeStyle = hasPending ? '#58a6ff' : '#3fb950';
-      ctx.lineWidth = 2.5;
-      ctx.strokeRect(deskZone.x, deskZone.y, deskZone.w, deskZone.h);
-
-      ctx.fillStyle = hasPending ? '#79c0ff' : '#7ee787';
-      ctx.font = '9px "Press Start 2P", monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText(hasPending ? 'PR READY!' : 'REPORT!', deskZone.x + deskZone.w / 2, deskZone.y + deskZone.h / 2 + 4);
-
-      // Junior Dev Character
-      const p = state.player;
-      const half = p.size / 2;
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
-      ctx.beginPath();
-      ctx.ellipse(p.x, p.y + half + 2, half * 0.9, 5, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = state.boostTimer > 0 ? '#e3b341' : '#3fb950';
-      ctx.fillRect(p.x - half, p.y - half, p.size, p.size);
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(p.x - half, p.y - half, p.size, p.size);
-
-      // Eyes
-      ctx.fillStyle = '#0d1117';
-      if (p.facing === 'left') {
-        ctx.fillRect(p.x - 9, p.y - 5, 4, 4);
-      } else if (p.facing === 'right') {
-        ctx.fillRect(p.x + 5, p.y - 5, 4, 4);
-      } else if (p.facing === 'up') {
-        ctx.fillRect(p.x - 7, p.y - 10, 4, 3);
-        ctx.fillRect(p.x + 3, p.y - 10, 4, 3);
-      } else {
-        ctx.fillRect(p.x - 7, p.y - 3, 4, 4);
-        ctx.fillRect(p.x + 3, p.y - 3, 4, 4);
+        if (rectsHit(reach, prDesk)) {
+          openModal(dom.inspectBtn);
+          return;
+        }
+        if (rectsHit(reach, espressoBar)) {
+          playTone(680, 0.07, "triangle");
+          setBanner("info", "ESPRESSO: Fresh roast pulled. Focus is sharp for the next pull request.");
+          return;
+        }
+        if (rectsHit(reach, ciRack)) {
+          setBanner(
+            rackOk ? "ok" : "bad",
+            rackOk
+              ? "CI/CD: Build pipeline green on the latest review."
+              : "CI/CD: Alert on last review. Check line numbers and clean vs. buggy carefully."
+          );
+          return;
+        }
+        var hitDesk = desks.find(function (d) { return rectsHit(reach, d); });
+        if (hitDesk) {
+          playTone(500, 0.06, "triangle");
+          setBanner("info", hitDesk.tip);
+        }
       }
-    }
 
-    function loop(now) {
-      const dt = Math.min(0.05, (now - lastTime) / 1000);
-      lastTime = now;
-      update(dt);
-      drawOffice();
-      requestAnimationFrame(loop);
-    }
+      dom.canvas.addEventListener("click", function (ev) {
+        var rect = dom.canvas.getBoundingClientRect();
+        var px = ((ev.clientX - rect.left) * dom.canvas.width) / rect.width;
+        var py = ((ev.clientY - rect.top) * dom.canvas.height) / rect.height;
 
-    updateHUD();
-    requestAnimationFrame(loop);
+        if (px >= prDesk.x && px <= prDesk.x + prDesk.w && py >= prDesk.y && py <= prDesk.y + prDesk.h) {
+          openModal(dom.inspectBtn);
+          return;
+        }
+        if (px >= espressoBar.x && px <= espressoBar.x + espressoBar.w && py >= espressoBar.y && py <= espressoBar.y + espressoBar.h) {
+          playTone(680, 0.07, "triangle");
+          setBanner("info", "ESPRESSO: Fresh roast pulled. Focus is sharp for the next pull request.");
+          return;
+        }
+        if (px >= ciRack.x && px <= ciRack.x + ciRack.w && py >= ciRack.y && py <= ciRack.y + ciRack.h) {
+          setBanner(
+            rackOk ? "ok" : "bad",
+            rackOk ? "CI/CD: All checks green." : "CI/CD: Alert active after last review."
+          );
+          return;
+        }
+        var clickedDesk = desks.find(function (d) {
+          return px >= d.x && px <= d.x + d.w && py >= d.y - 34 && py <= d.y + d.h;
+        });
+        if (clickedDesk) {
+          playTone(500, 0.06, "triangle");
+          setBanner("info", clickedDesk.tip);
+        }
+      });
+
+      window.addEventListener("keydown", function (ev) {
+        if (shift && shift.modalOpen) {
+          if (ev.key === "Escape") {
+            ev.preventDefault();
+            closeModal();
+          }
+          return;
+        }
+        keys[ev.code] = true;
+        if (ev.code === "KeyE" || ev.code === "Enter") {
+          if (document.activeElement === dom.canvas) {
+            ev.preventDefault();
+            interactNearby();
+          }
+        }
+      });
+
+      window.addEventListener("keyup", function (ev) {
+        keys[ev.code] = false;
+      });
+
+      dom.sfxBtn.addEventListener("click", function () {
+        sfxEnabled = !sfxEnabled;
+        dom.sfxBtn.textContent = sfxEnabled ? "SFX: ON" : "SFX: OFF";
+        dom.sfxBtn.setAttribute("aria-pressed", sfxEnabled ? "true" : "false");
+        dom.sfxBtn.className = sfxEnabled ? "sfx-btn" : "sfx-btn muted";
+        if (sfxEnabled) playTone(620, 0.06, "square");
+      });
+
+      dom.newShiftBtn.addEventListener("click", startShift);
+      dom.inspectBtn.addEventListener("click", function () { openModal(dom.inspectBtn); });
+      dom.barHintBtn.addEventListener("click", useHint);
+      dom.closeModalBtn.addEventListener("click", closeModal);
+      dom.hintBtn.addEventListener("click", useHint);
+      dom.approveBtn.addEventListener("click", function () { submitReview("approve"); });
+      dom.flagBugBtn.addEventListener("click", function () { submitReview("flag_bug"); });
+
+      dom.modal.addEventListener("click", function (ev) {
+        if (ev.target === dom.modal) closeModal();
+      });
+
+      dom.resetStatsBtn.addEventListener("click", function () {
+        dom.confirmResetBtn.style.display = "inline-block";
+        dom.cancelResetBtn.style.display = "inline-block";
+      });
+
+      dom.cancelResetBtn.addEventListener("click", function () {
+        dom.confirmResetBtn.style.display = "none";
+        dom.cancelResetBtn.style.display = "none";
+      });
+
+      dom.confirmResetBtn.addEventListener("click", function () {
+        Storage.clearSavedStats();
+        dom.confirmResetBtn.style.display = "none";
+        dom.cancelResetBtn.style.display = "none";
+        syncCareerMeta();
+        syncStorageNotice();
+        setBanner("info", "Saved stats reset to defaults.");
+      });
+
+      syncStorageNotice();
+      syncCareerMeta();
+      startShift();
+
+      var prevTime = performance.now();
+      function frame(now) {
+        var dt = Math.min(0.05, (now - prevTime) / 1000);
+        prevTime = now;
+        updatePlayer(dt);
+        drawScene();
+        syncHud();
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    })();
   </script>
 </body>
 </html>
