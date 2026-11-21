@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bug Hunter: Junior Dev Edition (v0.2)</title>
+  <title>Bug Hunter: Junior Dev Edition (v0.3)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
@@ -127,6 +127,20 @@
 
     .retro-btn-purple:active:not(:disabled) {
       box-shadow: 0 1px 0 #3c1e70;
+    }
+
+    .retro-btn-red {
+      background: linear-gradient(180deg, #da3633 0%, #b62324 100%);
+      border-color: #f85149;
+      box-shadow: 0 4px 0 #6e1617, 0 6px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .retro-btn-red:hover:not(:disabled) {
+      box-shadow: 0 5px 0 #6e1617, 0 8px 15px rgba(0, 0, 0, 0.6);
+    }
+
+    .retro-btn-red:active:not(:disabled) {
+      box-shadow: 0 1px 0 #6e1617;
     }
 
     /* Top HUD */
@@ -598,6 +612,14 @@
       font-size: 14px;
       color: var(--accent-green);
     }
+
+    .summary-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
   </style>
 </head>
 <body>
@@ -616,8 +638,12 @@
           <span id="hud-score" class="hud-value green">0</span>
         </div>
         <div class="hud-card">
+          <span class="hud-label">BEST</span>
+          <span id="hud-best" class="hud-value green">0</span>
+        </div>
+        <div class="hud-card">
           <span class="hud-label">PRS REVIEWED</span>
-          <span id="hud-reviewed" class="hud-value blue">0 / 12</span>
+          <span id="hud-reviewed" class="hud-value blue">0 / 15</span>
         </div>
         <div class="hud-card">
           <span class="hud-label">STREAK</span>
@@ -652,9 +678,9 @@
   <div id="start-screen" class="full-overlay">
     <div class="start-card">
       <h1 class="start-title">BUG HUNTER</h1>
-      <div class="start-sub">JUNIOR DEV EDITION • V0.2 (CLEAN PRS + SHIFT REPORT)</div>
+      <div class="start-sub">JUNIOR DEV EDITION • V0.3 (15 PRS + LOCAL BEST SCORE)</div>
       <p class="start-desc">
-        Senior developers are opening pull requests—some contain high-severity bugs, and a few are
+        Senior developers are opening 15 pull requests—some contain high-severity bugs, and a few are
         completely clean! Inspect each diff at your desk: click the buggy line if something is broken,
         or click <strong>Approve PR (No Bugs)</strong> if the code is safe to merge.
       </p>
@@ -672,7 +698,7 @@
           Use Show Hint anytime, and visit Espresso for +45% speed
         </div>
       </div>
-      <button id="start-btn" class="retro-btn" type="button">START SHIFT (V0.2)</button>
+      <button id="start-btn" class="retro-btn" type="button">START SHIFT (V0.3)</button>
     </div>
   </div>
 
@@ -680,7 +706,7 @@
   <div id="summary-screen" class="full-overlay" style="display: none;">
     <div class="start-card" style="border-color: var(--accent-blue);">
       <h1 class="start-title" style="color: var(--accent-blue);">SHIFT REPORT</h1>
-      <div class="start-sub">ALL 12 SENIOR DEV PULL REQUESTS REVIEWED</div>
+      <div class="start-sub">ALL 15 SENIOR DEV PULL REQUESTS REVIEWED</div>
       <div class="summary-stats">
         <div class="summary-stat-box">
           <span>FINAL RANK</span>
@@ -703,7 +729,10 @@
           <strong id="sum-best-score" style="color: var(--accent-green);">0</strong>
         </div>
       </div>
-      <button id="replay-btn" class="retro-btn" type="button">PLAY AGAIN (SHUFFLED)</button>
+      <div class="summary-actions">
+        <button id="replay-btn" class="retro-btn" type="button">PLAY AGAIN (SHUFFLED)</button>
+        <button id="reset-stats-btn" class="retro-btn retro-btn-red" type="button">RESET STATS</button>
+      </div>
     </div>
   </div>
 
@@ -810,7 +839,7 @@
       };
     })();
 
-    // --- Pull Request Dataset (10 Buggy PRs + 2 Clean PRs with Severity Levels) ---
+    // --- Pull Request Dataset (15 PRs across JS, Python, SQL, React, CSS, and TypeScript) ---
     const BASE_PR_SCENARIOS = [
       {
         id: 'PR #101',
@@ -1025,6 +1054,57 @@
         ],
         bugLine: 0,
         explanation: 'Mixing an aggregate function like AVG(total) with a non-aggregated column (customer_id) without GROUP BY causes a SQL query error.'
+      },
+      {
+        id: 'PR #113',
+        author: 'Elena (Staff Platform)',
+        title: 'Read profile display name from API payload',
+        language: 'TYPESCRIPT',
+        severity: 'MAJOR',
+        basePoints: 150,
+        hint: 'Forcing a nullable response with `as Profile` bypasses null checks before reading `.displayName`.',
+        lines: [
+          'function formatGreeting(payload: unknown): string {',
+          '  const profile = payload as { displayName: string };',
+          '  return `Welcome back, ${profile.displayName}!`;',
+          '}'
+        ],
+        bugLine: 1,
+        explanation: 'Using a type assertion (`as`) on an unvalidated `unknown` payload does not guard against `null` or missing `displayName` at runtime.'
+      },
+      {
+        id: 'PR #114',
+        author: 'Marcus (Principal Backend)',
+        title: 'Render user bio note in activity feed',
+        language: 'JAVASCRIPT',
+        severity: 'PROD-OUTAGE',
+        basePoints: 250,
+        hint: 'Assigning untrusted user text directly to `.innerHTML` can execute injected HTML or scripts.',
+        lines: [
+          'function renderBioNote(container, bioText) {',
+          '  if (!container) return;',
+          '  container.innerHTML = bioText;',
+          '}'
+        ],
+        bugLine: 2,
+        explanation: 'Setting `.innerHTML` directly on raw user input introduces XSS risk; use `.textContent` instead for plain user text.'
+      },
+      {
+        id: 'PR #115',
+        author: 'Priya (Lead Frontend)',
+        title: 'Sticky table header wrapper styling',
+        language: 'CSS',
+        severity: 'MINOR',
+        basePoints: 100,
+        hint: 'Check what `overflow: hidden` on an ancestor does to `position: sticky` elements.',
+        lines: [
+          '.table-wrapper {',
+          '  max-height: 360px;',
+          '  overflow: hidden;',
+          '}'
+        ],
+        bugLine: 2,
+        explanation: '`overflow: hidden` breaks `position: sticky` descendants—use `overflow: auto` (or `clip` only when appropriate) for scrollable sticky headers.'
       }
     ];
 
@@ -1032,10 +1112,15 @@
     const canvas = document.getElementById('office-canvas');
     const ctx = canvas.getContext('2d');
 
+    const initialStored = window.BugHunterStorage
+      ? window.BugHunterStorage.getStats()
+      : { bestScore: 0, bestStreak: 0, shiftsCompleted: 0 };
+
     const state = {
       started: false,
       queue: [...BASE_PR_SCENARIOS],
       score: 0,
+      bestScore: initialStored.bestScore,
       reviewedCount: 0,
       firstTrySuccesses: 0,
       madeMistakeOnCurrent: false,
@@ -1071,6 +1156,7 @@
     // --- UI Elements ---
     const hudRole = document.getElementById('hud-role');
     const hudScore = document.getElementById('hud-score');
+    const hudBest = document.getElementById('hud-best');
     const hudReviewed = document.getElementById('hud-reviewed');
     const hudStreak = document.getElementById('hud-streak');
     const boostPill = document.getElementById('boost-pill');
@@ -1088,6 +1174,7 @@
     const sumHints = document.getElementById('sum-hints');
     const sumBestScore = document.getElementById('sum-best-score');
     const replayBtn = document.getElementById('replay-btn');
+    const resetStatsBtn = document.getElementById('reset-stats-btn');
 
     const prModal = document.getElementById('pr-modal');
     const prTitle = document.getElementById('pr-modal-title');
@@ -1103,9 +1190,9 @@
     const nextPrBtn = document.getElementById('next-pr-btn');
 
     function getRoleTitle(reviewed) {
-      if (reviewed >= 11) return 'STAFF ENG';
-      if (reviewed >= 8) return 'SENIOR DEV';
-      if (reviewed >= 4) return 'MID DEV';
+      if (reviewed >= 14) return 'STAFF ENG';
+      if (reviewed >= 10) return 'SENIOR DEV';
+      if (reviewed >= 5) return 'MID DEV';
       return 'INTERN';
     }
 
@@ -1122,6 +1209,7 @@
     function updateHUD() {
       hudRole.textContent = getRoleTitle(state.reviewedCount);
       hudScore.textContent = state.score;
+      hudBest.textContent = state.bestScore;
       hudReviewed.textContent = `${state.reviewedCount} / ${state.queue.length}`;
       hudStreak.textContent = `${state.streak}x`;
 
@@ -1158,13 +1246,15 @@
       const accuracy = Math.round((state.firstTrySuccesses / total) * 100);
       const savedStats = window.BugHunterStorage
         ? window.BugHunterStorage.recordShift(state.score, state.bestRunStreak)
-        : { bestScore: state.score };
+        : { bestScore: Math.max(state.bestScore, state.score) };
 
+      state.bestScore = savedStats.bestScore;
       sumRank.textContent = getRoleTitle(state.reviewedCount);
       sumScore.textContent = state.score;
       sumAccuracy.textContent = `${accuracy}% (${state.firstTrySuccesses}/${total})`;
       sumHints.textContent = state.hintsUsed;
       sumBestScore.textContent = savedStats.bestScore;
+      updateHUD();
       summaryScreen.style.display = 'flex';
       AudioEngine.success();
     }
@@ -1277,6 +1367,9 @@
       const streakBonus = (state.streak - 1) * 25;
       const pointsEarned = pr.basePoints + streakBonus;
       state.score += pointsEarned;
+      if (state.score > state.bestScore) {
+        state.bestScore = state.score;
+      }
       state.prIndex += 1;
 
       approvePrBtn.disabled = true;
@@ -1365,6 +1458,16 @@
 
     replayBtn.addEventListener('click', () => {
       resetShift(true);
+    });
+
+    resetStatsBtn.addEventListener('click', () => {
+      if (window.BugHunterStorage) {
+        window.BugHunterStorage.clearStats();
+      }
+      state.bestScore = 0;
+      sumBestScore.textContent = '0';
+      updateHUD();
+      showToast('SAVED STATS CLEARED!', '#f85149');
     });
 
     muteBtn.addEventListener('click', () => {
@@ -1602,7 +1705,7 @@
       }
     }
 
-    function loop(now) {
+    function loop(now) { 
       const dt = Math.min(0.05, (now - lastTime) / 1000);
       lastTime = now;
       update(dt);
