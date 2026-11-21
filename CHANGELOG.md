@@ -2,6 +2,61 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.0] - 2026-11-21
+
+### Added
+
+- Added three shift presets: 10-PR Quick, 15-PR Standard, and 20-PR Overtime.
+- Added 15 new pull request scenarios covering Java, Go, JavaScript, and SQL.
+- Added pull request categories for security, performance, state management, SQL, and clean code.
+- Added low, medium, high, and critical severity scoring:
+  - Low: 50 base points
+  - Medium: 80 base points
+  - High: 120 base points
+  - Critical: 160 base points
+- Added streak multipliers based on severity-specific streak bonuses.
+- Added an aggregate career, accuracy, hint, and review-statistics display.
+- Added total pull requests reviewed and total correct reviews to persistent statistics.
+- Added v0.5 local storage migration and fallback support.
+- Added visible storage status for migrated and unavailable storage.
+- Added confirmation and cancellation controls for resetting saved statistics.
+- Added keyboard selection of code lines with `Enter` or `Space`.
+- Added `Escape` and click-outside handling for the review modal.
+- Added modal focus restoration and live status announcements.
+- Added a reduced-motion CSS mode.
+- Added built-in core tests covering schema validation, storage migration, scoring, ranks, deck balancing, and 15-review state synchronization.
+- Added separate `bugHunterCore.js` and `prScenariosAndTests.js` modules.
+
+### Changed
+
+- Reworked the review flow around modular core state:
+  - Pull requests can be approved as clean or flagged on a selected bug line.
+  - Incorrect decisions apply severity-based penalties.
+  - Shift state tracks score, streak, reviewed count, correct count, and completion consistently.
+- Updated career ranks to be based on cumulative score thresholds:
+  - Intern: 0
+  - Junior Dev: 150
+  - Software Dev: 350
+  - Mid Dev: 600
+  - Senior Dev: 900
+  - Staff Eng: 1,250
+  - Principal Eng: 1,650
+- Updated the shift deck builder to balance clean and buggy pull requests.
+- Updated replay behavior to rebuild a shuffled balanced deck for the selected preset.
+- Updated local storage data to use `bug_hunter_v0_5_stats_v1`.
+- Updated v0.4 and v0.2 data migration to the v0.5 normalized statistics format.
+- Updated the interface to expose shift length, aggregate career metadata, and storage notices.
+- Updated scenario data to include category and severity metadata.
+
+### Fixed
+
+- Prevented invalid pull requests from entering the active scenario pool.
+- Added bounds checking for selected code lines and `bugLine` values.
+- Prevented review submission after a shift is complete.
+- Reset modal selection and selection-dependent controls when opening or closing reviews.
+- Added safe handling for blocked or unavailable browser local storage.
+- Added in-memory storage fallback when persistent storage cannot be used.
+
 ## [0.4.0] - 2026-11-21
 
 ### Added
@@ -120,60 +175,3 @@ All notable changes to this project are documented in this file.
 
 - Removed the sprint timer and timer-end failure behavior.
 - Removed timed score pressure from the core gameplay loop.
-
-## v0.5 Roadmap
-
-The v0.5 release should focus on reliability, accessibility, testing, and stronger long-term game progression without changing the core 15-review shift loop.
-
-## Priority 1: Correctness and Testing
-
-- [ ] Add an automated test runner for storage normalization and migration.
-- [ ] Add tests for score, streak, accuracy, and rank calculations.
-- [ ] Add tests for clean versus buggy PR review outcomes.
-- [ ] Add tests for replay and queue shuffling.
-- [ ] Validate every pull request has a valid line index or uses `bugLine: null`.
-- [ ] Prevent the player or modal state from drifting out of sync after repeated reviews.
-
-## Priority 2: Content and Variety
-
-- [ ] Add more pull request scenarios across existing languages.
-- [ ] Add at least one additional language, such as Java or Go.
-- [ ] Balance point values and streak rewards across severity levels.
-- [ ] Tag pull requests by category, such as security, performance, state management, and SQL.
-- [ ] Randomize scenario selection while preserving an even mix of clean and buggy PRs.
-- [ ] Add a difficulty selection for shorter or longer shifts.
-
-## Priority 3: Accessibility and Mobile UX
-
-- [ ] Add keyboard focus states and visible modal focus indicators.
-- [ ] Support keyboard selection of code lines with Enter or Space.
-- [ ] Trap focus inside open dialogs and restore focus when they close.
-- [ ] Improve screen-reader labels for HUD values and review feedback.
-- [ ] Do not rely only on color to communicate success, warnings, or build status.
-- [ ] Respect reduced-motion preferences for blinking LEDs and screen animations.
-- [ ] Test touch controls and modal layout on smaller mobile screens.
-
-## Priority 4: Persistence
-
-- [ ] Record additional aggregate statistics, such as total PRs reviewed and hints used.
-- [ ] Add a migration and versioning test suite for local storage keys.
-- [ ] Provide a clear in-game confirmation before resetting saved statistics.
-- [ ] Handle unavailable or restricted local storage safely and visibly.
-
-## Priority 5: Project Structure
-
-- [ ] Separate pull request data from gameplay code for easier maintenance.
-- [ ] Split large inline HTML sections into organized CSS and JavaScript modules.
-- [ ] Add a development server and package scripts, if the project adopts a build process.
-- [ ] Add a browser-based smoke test or CI workflow for static file validation.
-- [ ] Keep external font loading optional so the interface remains usable offline.
-
-## Success Criteria
-
-v0.5 will be ready for release when:
-
-- Shift scoring and progression are covered by automated tests.
-- Stored statistics migrate correctly across supported versions.
-- The review modal is operable by keyboard and usable by assistive technology.
-- Mobile and desktop layouts have been manually smoke-tested.
-- Pull request data has been validated against a consistent scenario format.
