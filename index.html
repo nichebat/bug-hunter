@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bug Hunter: Junior Dev Edition (v0.3)</title>
+  <title>Bug Hunter: Junior Dev Edition (v0.4)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
@@ -525,7 +525,7 @@
     }
 
     .start-card {
-      max-width: 660px;
+      max-width: 680px;
       width: 100%;
       background: var(--panel-bg);
       border: 3px solid var(--accent-green);
@@ -609,7 +609,7 @@
 
     .summary-stat-box strong {
       font-family: var(--pixel-font);
-      font-size: 14px;
+      font-size: 13px;
       color: var(--accent-green);
     }
 
@@ -678,11 +678,11 @@
   <div id="start-screen" class="full-overlay">
     <div class="start-card">
       <h1 class="start-title">BUG HUNTER</h1>
-      <div class="start-sub">JUNIOR DEV EDITION • V0.3 (15 PRS + LOCAL BEST SCORE)</div>
+      <div class="start-sub">JUNIOR DEV EDITION • V0.4 (SENIOR NPCS + 7-TIER PROMOTIONS)</div>
       <p class="start-desc">
         Senior developers are opening 15 pull requests—some contain high-severity bugs, and a few are
-        completely clean! Inspect each diff at your desk: click the buggy line if something is broken,
-        or click <strong>Approve PR (No Bugs)</strong> if the code is safe to merge.
+        completely clean! Climb from <strong>Intern</strong> through <strong>Junior Dev</strong> and
+        <strong>Software Dev</strong> all the way to <strong>Principal Eng</strong> while keeping the build server green.
       </p>
       <div class="controls-grid">
         <div class="control-item">
@@ -694,11 +694,11 @@
           Click the buggy line, or click Approve PR if there are zero bugs
         </div>
         <div class="control-item">
-          <strong>HINTS &amp; COFFEE</strong>
-          Use Show Hint anytime, and visit Espresso for +45% speed
+          <strong>7 CAREER RANKS</strong>
+          Intern, Junior Dev, Software Dev, Mid Dev, Senior Dev, Staff Eng, Principal Eng
         </div>
       </div>
-      <button id="start-btn" class="retro-btn" type="button">START SHIFT (V0.3)</button>
+      <button id="start-btn" class="retro-btn" type="button">START SHIFT (V0.4)</button>
     </div>
   </div>
 
@@ -710,7 +710,7 @@
       <div class="summary-stats">
         <div class="summary-stat-box">
           <span>FINAL RANK</span>
-          <strong id="sum-rank" style="color: var(--accent-purple);">STAFF ENG</strong>
+          <strong id="sum-rank" style="color: var(--accent-purple);">PRINCIPAL ENG</strong>
         </div>
         <div class="summary-stat-box">
           <span>TOTAL SCORE</span>
@@ -727,6 +727,10 @@
         <div class="summary-stat-box">
           <span>ALL-TIME BEST</span>
           <strong id="sum-best-score" style="color: var(--accent-green);">0</strong>
+        </div>
+        <div class="summary-stat-box">
+          <span>BEST ACCURACY</span>
+          <strong id="sum-best-accuracy" style="color: var(--accent-blue);">0%</strong>
         </div>
       </div>
       <div class="summary-actions">
@@ -1114,13 +1118,14 @@
 
     const initialStored = window.BugHunterStorage
       ? window.BugHunterStorage.getStats()
-      : { bestScore: 0, bestStreak: 0, shiftsCompleted: 0 };
+      : { bestScore: 0, lastScore: 0, bestStreak: 0, bestAccuracy: 0, shiftsCompleted: 0 };
 
     const state = {
       started: false,
       queue: [...BASE_PR_SCENARIOS],
       score: 0,
       bestScore: initialStored.bestScore,
+      bestAccuracy: initialStored.bestAccuracy,
       reviewedCount: 0,
       firstTrySuccesses: 0,
       madeMistakeOnCurrent: false,
@@ -1131,6 +1136,10 @@
       activePR: null,
       prSolved: false,
       boostTimer: 0,
+      buildAlertTimer: 0,
+      activeChatter: null,
+      chatterTimer: 0,
+      chatterCooldown: 2.0,
       player: {
         x: 480,
         y: 340,
@@ -1146,11 +1155,36 @@
     // World landmarks
     const deskZone = { x: 430, y: 215, w: 100, h: 64, label: 'YOUR WORKSTATION' };
     const coffeeZone = { x: 745, y: 145, w: 72, h: 64, label: 'ESPRESSO MACHINE' };
+    const serverRack = { x: 72, y: 415, w: 54, h: 112 };
 
     const obstacles = [
-      { x: 120, y: 140, w: 120, h: 52 },
-      { x: 120, y: 250, w: 120, h: 52 },
-      { x: 730, y: 360, w: 120, h: 52 }
+      {
+        x: 120,
+        y: 140,
+        w: 120,
+        h: 52,
+        npcName: 'MARCUS',
+        shirt: '#58a6ff',
+        quotes: ['Works on my machine!', 'Just a quick hotfix...', 'Tests are green locally!']
+      },
+      {
+        x: 120,
+        y: 250,
+        w: 120,
+        h: 52,
+        npcName: 'ELENA',
+        shirt: '#bc8cff',
+        quotes: ['Check the edge cases!', 'Did we handle null?', 'Keep it clean!']
+      },
+      {
+        x: 730,
+        y: 360,
+        w: 120,
+        h: 52,
+        npcName: 'PRIYA',
+        shirt: '#f778ba',
+        quotes: ['Ship before standup?', 'Watch that render loop!', 'CSS sticky is tricky!']
+      }
     ];
 
     // --- UI Elements ---
@@ -1173,6 +1207,7 @@
     const sumAccuracy = document.getElementById('sum-accuracy');
     const sumHints = document.getElementById('sum-hints');
     const sumBestScore = document.getElementById('sum-best-score');
+    const sumBestAccuracy = document.getElementById('sum-best-accuracy');
     const replayBtn = document.getElementById('replay-btn');
     const resetStatsBtn = document.getElementById('reset-stats-btn');
 
@@ -1189,11 +1224,25 @@
     const closePrBtn = document.getElementById('close-pr-btn');
     const nextPrBtn = document.getElementById('next-pr-btn');
 
+    // 7-tier career ladder including Junior Dev, Software Dev, and Principal Eng
     function getRoleTitle(reviewed) {
-      if (reviewed >= 14) return 'STAFF ENG';
+      if (reviewed >= 15) return 'PRINCIPAL ENG';
+      if (reviewed >= 13) return 'STAFF ENG';
       if (reviewed >= 10) return 'SENIOR DEV';
-      if (reviewed >= 5) return 'MID DEV';
+      if (reviewed >= 7) return 'MID DEV';
+      if (reviewed >= 4) return 'SOFTWARE DEV';
+      if (reviewed >= 2) return 'JUNIOR DEV';
       return 'INTERN';
+    }
+
+    function triggerChatter(preferredDeskIdx = null, customText = null) {
+      const idx = preferredDeskIdx !== null
+        ? preferredDeskIdx
+        : Math.floor(Math.random() * obstacles.length);
+      const desk = obstacles[idx];
+      const text = customText || desk.quotes[Math.floor(Math.random() * desk.quotes.length)];
+      state.activeChatter = { deskIdx: idx, text };
+      state.chatterTimer = 3.2;
     }
 
     function showToast(message, borderColor = '#d29922') {
@@ -1245,15 +1294,20 @@
       const total = state.queue.length;
       const accuracy = Math.round((state.firstTrySuccesses / total) * 100);
       const savedStats = window.BugHunterStorage
-        ? window.BugHunterStorage.recordShift(state.score, state.bestRunStreak)
-        : { bestScore: Math.max(state.bestScore, state.score) };
+        ? window.BugHunterStorage.recordShift(state.score, state.bestRunStreak, accuracy)
+        : {
+            bestScore: Math.max(state.bestScore, state.score),
+            bestAccuracy: Math.max(state.bestAccuracy, accuracy)
+          };
 
       state.bestScore = savedStats.bestScore;
+      state.bestAccuracy = savedStats.bestAccuracy;
       sumRank.textContent = getRoleTitle(state.reviewedCount);
       sumScore.textContent = state.score;
       sumAccuracy.textContent = `${accuracy}% (${state.firstTrySuccesses}/${total})`;
       sumHints.textContent = state.hintsUsed;
       sumBestScore.textContent = savedStats.bestScore;
+      sumBestAccuracy.textContent = `${savedStats.bestAccuracy}%`;
       updateHUD();
       summaryScreen.style.display = 'flex';
       AudioEngine.success();
@@ -1279,11 +1333,13 @@
       state.activePR = null;
       state.prSolved = false;
       state.boostTimer = 0;
+      state.buildAlertTimer = 0;
       state.player.x = 480;
       state.player.y = 340;
       state.player.facing = 'down';
       summaryScreen.style.display = 'none';
       updateHUD();
+      triggerChatter(0, 'Fresh shift! Ready to review?');
       showToast('NEW SHIFT STARTED! WALK TO YOUR DESK TO REVIEW PRS.', '#58a6ff');
     }
 
@@ -1357,8 +1413,11 @@
 
     function completeCurrentPR(successMessage) {
       const pr = state.activePR;
+      const prevRole = getRoleTitle(state.reviewedCount);
       state.prSolved = true;
       state.reviewedCount += 1;
+      const nextRole = getRoleTitle(state.reviewedCount);
+
       if (!state.madeMistakeOnCurrent) {
         state.firstTrySuccesses += 1;
       }
@@ -1371,10 +1430,18 @@
         state.bestScore = state.score;
       }
       state.prIndex += 1;
+      state.buildAlertTimer = 0;
 
       approvePrBtn.disabled = true;
+      const promoNote = nextRole !== prevRole ? ` PROMOTED TO ${nextRole}!` : '';
       reviewFeedback.className = 'success';
-      reviewFeedback.textContent = `${successMessage} (+${pointsEarned} pts) ${pr.explanation}`;
+      reviewFeedback.textContent = `${successMessage} (+${pointsEarned} pts)${promoNote} ${pr.explanation}`;
+
+      if (nextRole !== prevRole) {
+        triggerChatter(null, `Congrats on ${nextRole}!`);
+      } else {
+        triggerChatter(null, 'Nice catch! Build green!');
+      }
 
       AudioEngine.success();
       updateHUD();
@@ -1390,6 +1457,7 @@
       if (pr.bugLine === null) {
         state.madeMistakeOnCurrent = true;
         state.streak = 0;
+        state.buildAlertTimer = 3.0;
         state.score = Math.max(0, state.score - 25);
         rowEl.classList.add('wrong');
         reviewFeedback.className = 'error';
@@ -1405,6 +1473,7 @@
       } else {
         state.madeMistakeOnCurrent = true;
         state.streak = 0;
+        state.buildAlertTimer = 3.0;
         state.score = Math.max(0, state.score - 25);
         rowEl.classList.add('wrong');
         reviewFeedback.className = 'error';
@@ -1424,6 +1493,7 @@
       } else {
         state.madeMistakeOnCurrent = true;
         state.streak = 0;
+        state.buildAlertTimer = 4.0;
         state.score = Math.max(0, state.score - 35);
         reviewFeedback.className = 'error';
         reviewFeedback.textContent = 'Careful! Approving this PR would ship a bug to production (-35 pts, streak reset). Click the buggy line instead!';
@@ -1453,6 +1523,7 @@
       startScreen.style.display = 'none';
       state.started = true;
       updateHUD();
+      triggerChatter(0, 'PR #101 is ready at your desk!');
       showToast('WALK TO YOUR GLOWING DESK TO INSPECT PRS!', '#58a6ff');
     });
 
@@ -1465,7 +1536,9 @@
         window.BugHunterStorage.clearStats();
       }
       state.bestScore = 0;
+      state.bestAccuracy = 0;
       sumBestScore.textContent = '0';
+      sumBestAccuracy.textContent = '0%';
       updateHUD();
       showToast('SAVED STATS CLEARED!', '#f85149');
     });
@@ -1517,6 +1590,12 @@
         } else {
           showToast('WALK CLOSER TO THE ESPRESSO MACHINE!', '#d29922');
         }
+      } else {
+        obstacles.forEach((ob, idx) => {
+          if (cx >= ob.x && cx <= ob.x + ob.w && cy >= ob.y - 26 && cy <= ob.y + ob.h) {
+            triggerChatter(idx);
+          }
+        });
       }
     });
 
@@ -1564,6 +1643,23 @@
         updateHUD();
       }
 
+      if (state.buildAlertTimer > 0) {
+        state.buildAlertTimer = Math.max(0, state.buildAlertTimer - dt);
+      }
+
+      if (state.chatterTimer > 0) {
+        state.chatterTimer = Math.max(0, state.chatterTimer - dt);
+        if (state.chatterTimer === 0) {
+          state.activeChatter = null;
+          state.chatterCooldown = 4.5 + Math.random() * 3.0;
+        }
+      } else {
+        state.chatterCooldown -= dt;
+        if (state.chatterCooldown <= 0) {
+          triggerChatter();
+        }
+      }
+
       let dx = 0;
       let dy = 0;
       if (state.keys['w'] || state.keys['arrowup'] || state.touchDir === 'up') dy -= 1;
@@ -1587,12 +1683,16 @@
       const half = state.player.size / 2;
 
       const nextX = Math.max(48 + half, Math.min(canvas.width - 48 - half, state.player.x + dx * currentSpeed * dt));
-      if (!obstacles.some((ob) => rectsOverlap(nextX - half, state.player.y - half, state.player.size, state.player.size, ob.x, ob.y, ob.w, ob.h))) {
+      const blocksMove = (nx, ny) =>
+        obstacles.some((ob) => rectsOverlap(nx - half, ny - half, state.player.size, state.player.size, ob.x, ob.y, ob.w, ob.h)) ||
+        rectsOverlap(nx - half, ny - half, state.player.size, state.player.size, serverRack.x, serverRack.y, serverRack.w, serverRack.h);
+
+      if (!blocksMove(nextX, state.player.y)) {
         state.player.x = nextX;
       }
 
       const nextY = Math.max(95 + half, Math.min(canvas.height - 40 - half, state.player.y + dy * currentSpeed * dt));
-      if (!obstacles.some((ob) => rectsOverlap(state.player.x - half, nextY - half, state.player.size, state.player.size, ob.x, ob.y, ob.w, ob.h))) {
+      if (!blocksMove(state.player.x, nextY)) {
         state.player.y = nextY;
       }
 
@@ -1610,6 +1710,90 @@
       } else {
         interactPrompt.style.display = 'none';
       }
+    }
+
+    function drawServerRack() {
+      const currentPR = state.queue[state.prIndex];
+      const isAlert = state.buildAlertTimer > 0 || (currentPR && currentPR.severity === 'PROD-OUTAGE');
+      const statusColor = state.buildAlertTimer > 0
+        ? '#f85149'
+        : isAlert
+          ? '#d29922'
+          : '#3fb950';
+
+      ctx.fillStyle = '#121722';
+      ctx.fillRect(serverRack.x, serverRack.y, serverRack.w, serverRack.h);
+      ctx.strokeStyle = statusColor;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(serverRack.x, serverRack.y, serverRack.w, serverRack.h);
+
+      // Server blades + blinking LEDs
+      const blink = Math.floor(performance.now() / 350) % 2 === 0;
+      for (let i = 0; i < 4; i++) {
+        const bladeY = serverRack.y + 12 + i * 22;
+        ctx.fillStyle = '#1d2534';
+        ctx.fillRect(serverRack.x + 7, bladeY, serverRack.w - 14, 15);
+        ctx.fillStyle = (i + (blink ? 1 : 0)) % 2 === 0 ? statusColor : '#58a6ff';
+        ctx.fillRect(serverRack.x + 11, bladeY + 5, 5, 5);
+        ctx.fillStyle = '#8b949e';
+        ctx.fillRect(serverRack.x + 21, bladeY + 6, 20, 3);
+      }
+
+      ctx.fillStyle = statusColor;
+      ctx.font = '7px "Press Start 2P", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('CI/CD', serverRack.x + serverRack.w / 2, serverRack.y - 6);
+    }
+
+    function drawSeniorDesksAndNPCs() {
+      obstacles.forEach((ob, idx) => {
+        // Senior Dev pixel avatar seated behind desk
+        const avatarX = ob.x + ob.w / 2 - 11;
+        const avatarY = ob.y - 20;
+        ctx.fillStyle = ob.shirt;
+        ctx.fillRect(avatarX, avatarY, 22, 20);
+        ctx.strokeStyle = '#e6edf3';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(avatarX, avatarY, 22, 20);
+
+        // Eyes looking down toward desk
+        ctx.fillStyle = '#0d1117';
+        ctx.fillRect(avatarX + 5, avatarY + 8, 3, 3);
+        ctx.fillRect(avatarX + 14, avatarY + 8, 3, 3);
+
+        // Desk surface
+        ctx.fillStyle = '#222b3a';
+        ctx.fillRect(ob.x, ob.y, ob.w, ob.h);
+        ctx.strokeStyle = '#364359';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(ob.x, ob.y, ob.w, ob.h);
+
+        ctx.fillStyle = '#8b949e';
+        ctx.font = '8px "Press Start 2P", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(ob.npcName, ob.x + ob.w / 2, ob.y + ob.h / 2 + 3);
+
+        // Speech bubble if active
+        if (state.activeChatter && state.activeChatter.deskIdx === idx) {
+          const msg = state.activeChatter.text;
+          ctx.font = '11px "JetBrains Mono", monospace';
+          const textW = ctx.measureText(msg).width;
+          const boxW = textW + 18;
+          const boxH = 26;
+          const bx = Math.max(16, Math.min(canvas.width - boxW - 16, ob.x + ob.w / 2 - boxW / 2));
+          const by = Math.max(96, avatarY - 34);
+
+          ctx.fillStyle = 'rgba(13, 17, 23, 0.95)';
+          ctx.fillRect(bx, by, boxW, boxH);
+          ctx.strokeStyle = ob.shirt;
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(bx, by, boxW, boxH);
+
+          ctx.fillStyle = '#e6edf3';
+          ctx.textAlign = 'center';
+          ctx.fillText(msg, bx + boxW / 2, by + 17);
+        }
+      });
     }
 
     function drawOffice() {
@@ -1646,18 +1830,8 @@
       ctx.textAlign = 'center';
       ctx.fillText('ESPRESSO', coffeeZone.x + coffeeZone.w / 2, coffeeZone.y + coffeeZone.h / 2 + 4);
 
-      // Obstacles (Senior Dev Cubicle Tables)
-      obstacles.forEach((ob) => {
-        ctx.fillStyle = '#222b3a';
-        ctx.fillRect(ob.x, ob.y, ob.w, ob.h);
-        ctx.strokeStyle = '#364359';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(ob.x, ob.y, ob.w, ob.h);
-        ctx.fillStyle = '#8b949e';
-        ctx.font = '8px "Press Start 2P", monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText('SENIOR DESK', ob.x + ob.w / 2, ob.y + ob.h / 2 + 3);
-      });
+      drawServerRack();
+      drawSeniorDesksAndNPCs();
 
       // Player Workstation
       const hasPending = state.prIndex < state.queue.length;
@@ -1705,7 +1879,7 @@
       }
     }
 
-    function loop(now) { 
+    function loop(now) {
       const dt = Math.min(0.05, (now - lastTime) / 1000);
       lastTime = now;
       update(dt);
